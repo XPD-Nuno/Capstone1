@@ -1,0 +1,3 @@
+fast_eur=148560
+slow_eur=78960
+gap_eur=69600

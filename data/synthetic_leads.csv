@@ -1,0 +1,181 @@
+﻿lead_id,channel,city,message,budget_eur,timeline_days,property_views_7d,saved_listings,replied_to_agent,phone_provided,email_provided,synthetic_family,synthetic_intent_hint
+lead_0001,instagram,Braga,"Quero comprar T2 em Braga, orçamento definido, posso visitar esta semana.",350000,30,11,4,True,True,True,hot_buy,buy
+lead_0002,walk-in,Braga,Procuro casa para viver em Braga. Já vi várias e quero avançar com crédito habitação.,220000,30,11,7,True,True,True,hot_buy,buy
+lead_0003,idealista,Faro,Just looking at the market in Faro for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0004,idealista,Setúbal,Crypto investment opportunity in Setúbal real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0005,website,Porto,Quero vender o meu T3 em Porto e preciso de uma avaliação esta semana.,,21,2,0,True,True,True,hot_sell,sell
+lead_0006,walk-in,Porto,"Talvez compre em Porto no próximo ano, ainda a ver opções.",200000,270,2,2,False,False,True,warm,buy
+lead_0007,walk-in,Vila Nova de Gaia,"Talvez compre em Vila Nova de Gaia no próximo ano, ainda a ver opções.",300000,270,7,2,False,False,True,warm,buy
+lead_0008,referral,Faro,Interested in buying near Faro. Budget is ready. Can we book a viewing?,280000,45,9,4,True,True,True,hot_buy,buy
+lead_0009,imovirtual,Cascais,Just looking at the market in Cascais for curiosity.,,,0,0,False,False,True,cold,unknown
+lead_0010,walk-in,Lisboa,Thinking of selling in Lisboa in the next two months. What is the process?,,75,0,0,True,True,True,hot_sell,sell
+lead_0011,referral,Lisboa,Just looking at the market in Lisboa for curiosity.,,,0,0,False,False,True,cold,unknown
+lead_0012,walk-in,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0013,idealista,Coimbra,"Só a ver preços em Coimbra, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0014,idealista,Oeiras,"Gostava de vender em Oeiras daqui a uns 8 meses, podem contactar-me por email.",,180,6,2,False,False,True,warm,buy
+lead_0015,referral,Cascais,"Só a ver preços em Cascais, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0016,imovirtual,Lisboa,Thinking of selling in Lisboa in the next two months. What is the process?,,75,4,0,True,True,True,hot_sell,sell
+lead_0017,imovirtual,Setúbal,"Só a ver preços em Setúbal, sem pressa e sem orçamento.",,,1,0,False,False,True,cold,unknown
+lead_0018,idealista,Vila Nova de Gaia,Procuro casa para viver em Vila Nova de Gaia. Já vi várias e quero avançar com crédito habitação.,480000,14,20,3,True,True,True,hot_buy,buy
+lead_0019,walk-in,Oeiras,Quero comprar em Oeiras mas o crédito ainda não está aprovado.,,,5,2,False,False,True,warm,buy
+lead_0020,instagram,Vila Nova de Gaia,Crypto investment opportunity in Vila Nova de Gaia real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0021,instagram,Lisboa,Just looking at the market in Lisboa for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0022,walk-in,Lisboa,"Talvez compre em Lisboa no próximo ano, ainda a ver opções.",200000,120,7,2,False,False,True,warm,buy
+lead_0023,walk-in,Cascais,"Quero comprar T2 em Cascais, orçamento definido, posso visitar esta semana.",350000,30,10,5,True,True,True,hot_buy,buy
+lead_0024,idealista,Braga,"Gostava de vender em Braga daqui a uns 8 meses, podem contactar-me por email.",,270,4,0,False,True,True,warm,buy
+lead_0025,idealista,Vila Nova de Gaia,Estou a comparar 4 T3 em Vila Nova de Gaia e gostava de uma proposta esta quinzena.,480000,14,20,7,True,True,True,hot_buy,buy
+lead_0026,instagram,Vila Nova de Gaia,Interested in buying near Vila Nova de Gaia. Budget is ready. Can we book a viewing?,650000,60,11,7,True,True,True,hot_buy,buy
+lead_0027,website,Porto,"Procuro arrendamento em Porto para 12 meses, estudante.",900,90,5,1,False,False,True,rent,rent
+lead_0028,website,Lisboa,"Gostava de vender em Lisboa daqui a uns 8 meses, podem contactar-me por email.",300000,180,6,0,False,True,True,warm,buy
+lead_0029,website,Braga,Thinking of selling in Braga in the next two months. What is the process?,,21,2,0,True,True,True,hot_sell,sell
+lead_0030,walk-in,Lisboa,"Looking to rent a studio in Lisboa, no rush.",750,180,2,2,False,False,True,rent,rent
+lead_0031,imovirtual,Lisboa,Quero comprar em Lisboa mas o crédito ainda não está aprovado.,200000,180,2,0,False,False,True,warm,buy
+lead_0032,instagram,Porto,Crypto investment opportunity in Porto real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0033,idealista,Vila Nova de Gaia,Procuro casa para viver em Vila Nova de Gaia. Já vi várias e quero avançar com crédito habitação.,480000,45,20,3,True,True,True,hot_buy,buy
+lead_0034,referral,Setúbal,"Quero comprar T2 em Setúbal, orçamento definido, posso visitar esta semana.",280000,45,15,4,True,True,True,hot_buy,buy
+lead_0035,website,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0036,website,Lisboa,Quero comprar em Lisboa mas o crédito ainda não está aprovado.,,,2,0,False,False,True,warm,buy
+lead_0037,imovirtual,Lisboa,Just looking at the market in Lisboa for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0038,instagram,Coimbra,Crypto investment opportunity in Coimbra real estate guaranteed profit.,,,2,0,False,False,True,cold,unknown
+lead_0039,walk-in,Cascais,Thinking of selling in Cascais in the next two months. What is the process?,,21,0,0,True,True,True,hot_sell,sell
+lead_0040,website,Setúbal,Crypto investment opportunity in Setúbal real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0041,idealista,Cascais,"Só a ver preços em Cascais, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0042,referral,Vila Nova de Gaia,"Quero comprar T2 em Vila Nova de Gaia, orçamento definido, posso visitar esta semana.",280000,14,17,3,True,True,True,hot_buy,buy
+lead_0043,website,Vila Nova de Gaia,"Looking to rent a studio in Vila Nova de Gaia, no rush.",1200,180,1,2,False,False,True,rent,rent
+lead_0044,instagram,Coimbra,"Looking to rent a studio in Coimbra, no rush.",900,90,2,2,False,False,True,rent,rent
+lead_0045,website,Lisboa,Quero comprar em Lisboa mas o crédito ainda não está aprovado.,300000,270,5,1,False,True,True,warm,buy
+lead_0046,walk-in,Braga,"Looking to rent a studio in Braga, no rush.",750,30,5,0,False,False,True,rent,rent
+lead_0047,referral,Lisboa,"Gostava de vender em Lisboa daqui a uns 8 meses, podem contactar-me por email.",,180,4,1,False,True,True,warm,buy
+lead_0048,walk-in,Faro,"Looking to rent a studio in Faro, no rush.",1200,180,1,2,False,False,True,rent,rent
+lead_0049,imovirtual,Vila Nova de Gaia,Interested in buying near Vila Nova de Gaia. Budget is ready. Can we book a viewing?,280000,45,9,3,True,True,True,hot_buy,buy
+lead_0050,instagram,Braga,Crypto investment opportunity in Braga real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0051,imovirtual,Sintra,"Talvez compre em Sintra no próximo ano, ainda a ver opções.",200000,120,2,2,False,False,True,warm,buy
+lead_0052,imovirtual,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0053,website,Faro,"Procuro arrendamento em Faro para 12 meses, estudante.",900,180,1,0,False,False,True,rent,rent
+lead_0054,walk-in,Setúbal,"Só a ver preços em Setúbal, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0055,instagram,Porto,Procuro casa para viver em Porto. Já vi várias e quero avançar com crédito habitação.,350000,14,22,5,True,True,True,hot_buy,buy
+lead_0056,idealista,Coimbra,"Talvez compre em Coimbra no próximo ano, ainda a ver opções.",300000,,6,2,False,True,True,warm,buy
+lead_0057,website,Vila Nova de Gaia,"Só a ver preços em Vila Nova de Gaia, sem pressa e sem orçamento.",,,1,0,False,False,True,cold,unknown
+lead_0058,referral,Faro,"Talvez compre em Faro no próximo ano, ainda a ver opções.",200000,180,4,0,False,True,True,warm,buy
+lead_0059,imovirtual,Sintra,Quero vender o meu T3 em Sintra e preciso de uma avaliação esta semana.,,45,2,0,True,True,True,hot_sell,sell
+lead_0060,imovirtual,Lisboa,"Looking to rent a studio in Lisboa, no rush.",900,90,3,0,False,False,True,rent,rent
+lead_0061,idealista,Braga,"Gostava de vender em Braga daqui a uns 8 meses, podem contactar-me por email.",300000,270,2,0,False,False,True,warm,buy
+lead_0062,referral,Vila Nova de Gaia,Herdámos um apartamento em Vila Nova de Gaia e queremos listar o mais rápido possível.,,21,4,0,True,True,True,hot_sell,sell
+lead_0063,imovirtual,Faro,"Talvez compre em Faro no próximo ano, ainda a ver opções.",300000,120,5,2,False,True,True,warm,buy
+lead_0064,instagram,Faro,Interested in buying near Faro. Budget is ready. Can we book a viewing?,650000,30,13,6,True,True,True,hot_buy,buy
+lead_0065,imovirtual,Braga,"Looking to rent a studio in Braga, no rush.",750,180,3,2,False,False,True,rent,rent
+lead_0066,instagram,Porto,"Looking to rent a studio in Porto, no rush.",1200,30,2,1,False,False,True,rent,rent
+lead_0067,walk-in,Coimbra,Just looking at the market in Coimbra for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0068,imovirtual,Porto,"Só a ver preços em Porto, sem pressa e sem orçamento.",,,1,0,False,False,True,cold,unknown
+lead_0069,referral,Porto,"Procuro arrendamento em Porto para 12 meses, estudante.",1200,90,4,1,False,False,True,rent,rent
+lead_0070,idealista,Cascais,Crypto investment opportunity in Cascais real estate guaranteed profit.,,,2,0,False,False,True,cold,unknown
+lead_0071,idealista,Lisboa,"Talvez compre em Lisboa no próximo ano, ainda a ver opções.",300000,270,2,0,False,False,True,warm,buy
+lead_0072,instagram,Lisboa,Estou a comparar 4 T3 em Lisboa e gostava de uma proposta esta quinzena.,480000,14,15,6,True,True,True,hot_buy,buy
+lead_0073,website,Cascais,Herdámos um apartamento em Cascais e queremos listar o mais rápido possível.,,75,0,0,True,True,True,hot_sell,sell
+lead_0074,walk-in,Lisboa,Just looking at the market in Lisboa for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0075,idealista,Lisboa,Herdámos um apartamento em Lisboa e queremos listar o mais rápido possível.,,21,3,0,True,True,True,hot_sell,sell
+lead_0076,imovirtual,Coimbra,Just looking at the market in Coimbra for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0077,referral,Braga,Crypto investment opportunity in Braga real estate guaranteed profit.,,,2,0,False,False,True,cold,unknown
+lead_0078,walk-in,Cascais,Estou a comparar 4 T3 em Cascais e gostava de uma proposta esta quinzena.,480000,60,12,4,False,True,True,hot_buy,buy
+lead_0079,idealista,Braga,Herdámos um apartamento em Braga e queremos listar o mais rápido possível.,,21,2,0,True,True,True,hot_sell,sell
+lead_0080,idealista,Porto,"Só a ver preços em Porto, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0081,referral,Lisboa,"Looking to rent a studio in Lisboa, no rush.",1200,30,1,1,False,False,True,rent,rent
+lead_0082,walk-in,Setúbal,Quero comprar em Setúbal mas o crédito ainda não está aprovado.,,,5,2,False,True,True,warm,buy
+lead_0083,referral,Cascais,Just looking at the market in Cascais for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0084,idealista,Setúbal,Just looking at the market in Setúbal for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0085,instagram,Lisboa,"Talvez compre em Lisboa no próximo ano, ainda a ver opções.",,,4,2,False,False,True,warm,buy
+lead_0086,walk-in,Sintra,"Só a ver preços em Sintra, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0087,referral,Vila Nova de Gaia,"Procuro arrendamento em Vila Nova de Gaia para 12 meses, estudante.",1200,30,1,2,False,False,True,rent,rent
+lead_0088,imovirtual,Sintra,Quero vender o meu T3 em Sintra e preciso de uma avaliação esta semana.,,45,3,0,True,True,True,hot_sell,sell
+lead_0089,referral,Cascais,"Talvez compre em Cascais no próximo ano, ainda a ver opções.",200000,270,5,1,False,True,True,warm,buy
+lead_0090,website,Faro,Procuro casa para viver em Faro. Já vi várias e quero avançar com crédito habitação.,350000,30,18,3,True,True,True,hot_buy,buy
+lead_0091,walk-in,Lisboa,Procuro casa para viver em Lisboa. Já vi várias e quero avançar com crédito habitação.,280000,30,10,6,True,True,True,hot_buy,buy
+lead_0092,walk-in,Cascais,Thinking of selling in Cascais in the next two months. What is the process?,,45,1,0,True,True,True,hot_sell,sell
+lead_0093,imovirtual,Vila Nova de Gaia,"Só a ver preços em Vila Nova de Gaia, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0094,instagram,Setúbal,Just looking at the market in Setúbal for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0095,walk-in,Porto,Crypto investment opportunity in Porto real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0096,instagram,Sintra,Thinking of selling in Sintra in the next two months. What is the process?,,75,2,0,True,True,True,hot_sell,sell
+lead_0097,website,Oeiras,Just looking at the market in Oeiras for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0098,website,Setúbal,"Looking to rent a studio in Setúbal, no rush.",750,180,6,1,False,False,True,rent,rent
+lead_0099,idealista,Sintra,Interested in buying near Sintra. Budget is ready. Can we book a viewing?,350000,60,19,4,False,True,True,hot_buy,buy
+lead_0100,referral,Braga,Just looking at the market in Braga for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0101,referral,Sintra,"Procuro arrendamento em Sintra para 12 meses, estudante.",900,30,1,1,False,False,True,rent,rent
+lead_0102,referral,Faro,"Looking to rent a studio in Faro, no rush.",1200,90,3,0,False,False,True,rent,rent
+lead_0103,imovirtual,Lisboa,Thinking of selling in Lisboa in the next two months. What is the process?,,45,2,0,True,True,True,hot_sell,sell
+lead_0104,idealista,Faro,Quero vender o meu T3 em Faro e preciso de uma avaliação esta semana.,,21,4,0,True,True,True,hot_sell,sell
+lead_0105,referral,Lisboa,"Talvez compre em Lisboa no próximo ano, ainda a ver opções.",300000,180,7,1,False,False,True,warm,buy
+lead_0106,imovirtual,Lisboa,Thinking of selling in Lisboa in the next two months. What is the process?,,75,1,0,True,True,True,hot_sell,sell
+lead_0107,imovirtual,Setúbal,"Gostava de vender em Setúbal daqui a uns 8 meses, podem contactar-me por email.",300000,270,5,2,False,False,True,warm,buy
+lead_0108,website,Cascais,"Gostava de vender em Cascais daqui a uns 8 meses, podem contactar-me por email.",,120,7,0,False,False,True,warm,buy
+lead_0109,idealista,Setúbal,"Só a ver preços em Setúbal, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0110,walk-in,Faro,Herdámos um apartamento em Faro e queremos listar o mais rápido possível.,,75,4,0,True,True,True,hot_sell,sell
+lead_0111,idealista,Vila Nova de Gaia,Just looking at the market in Vila Nova de Gaia for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0112,walk-in,Lisboa,Interested in buying near Lisboa. Budget is ready. Can we book a viewing?,650000,30,12,3,True,True,True,hot_buy,buy
+lead_0113,referral,Coimbra,Estou a comparar 4 T3 em Coimbra e gostava de uma proposta esta quinzena.,480000,14,21,3,False,True,True,hot_buy,buy
+lead_0114,referral,Cascais,Quero vender o meu T3 em Cascais e preciso de uma avaliação esta semana.,,21,2,0,True,True,True,hot_sell,sell
+lead_0115,website,Sintra,"Talvez compre em Sintra no próximo ano, ainda a ver opções.",,120,3,0,False,False,True,warm,buy
+lead_0116,walk-in,Lisboa,Crypto investment opportunity in Lisboa real estate guaranteed profit.,,,2,0,False,False,True,cold,unknown
+lead_0117,imovirtual,Lisboa,"Gostava de vender em Lisboa daqui a uns 8 meses, podem contactar-me por email.",200000,,4,2,False,False,True,warm,buy
+lead_0118,idealista,Braga,"Looking to rent a studio in Braga, no rush.",1200,30,2,2,False,False,True,rent,rent
+lead_0119,referral,Coimbra,Estou a comparar 4 T3 em Coimbra e gostava de uma proposta esta quinzena.,280000,14,10,3,False,True,True,hot_buy,buy
+lead_0120,instagram,Porto,Herdámos um apartamento em Porto e queremos listar o mais rápido possível.,,75,2,0,True,True,True,hot_sell,sell
+lead_0121,instagram,Lisboa,Quero vender o meu T3 em Lisboa e preciso de uma avaliação esta semana.,,45,4,0,True,True,True,hot_sell,sell
+lead_0122,website,Porto,"Talvez compre em Porto no próximo ano, ainda a ver opções.",300000,180,4,0,False,True,True,warm,buy
+lead_0123,referral,Oeiras,"Looking to rent a studio in Oeiras, no rush.",1200,90,4,0,False,False,True,rent,rent
+lead_0124,walk-in,Coimbra,Just looking at the market in Coimbra for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0125,imovirtual,Porto,"Procuro arrendamento em Porto para 12 meses, estudante.",900,180,3,2,False,False,True,rent,rent
+lead_0126,walk-in,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0127,referral,Vila Nova de Gaia,"Looking to rent a studio in Vila Nova de Gaia, no rush.",900,180,1,0,False,False,True,rent,rent
+lead_0128,instagram,Vila Nova de Gaia,Herdámos um apartamento em Vila Nova de Gaia e queremos listar o mais rápido possível.,,75,3,0,True,True,True,hot_sell,sell
+lead_0129,idealista,Vila Nova de Gaia,Quero comprar em Vila Nova de Gaia mas o crédito ainda não está aprovado.,200000,270,4,2,False,True,True,warm,buy
+lead_0130,website,Porto,Quero comprar em Porto mas o crédito ainda não está aprovado.,300000,,6,0,False,False,True,warm,buy
+lead_0131,referral,Lisboa,"Quero comprar T2 em Lisboa, orçamento definido, posso visitar esta semana.",480000,14,18,7,False,True,True,hot_buy,buy
+lead_0132,walk-in,Lisboa,"Talvez compre em Lisboa no próximo ano, ainda a ver opções.",200000,,2,0,False,False,True,warm,buy
+lead_0133,instagram,Vila Nova de Gaia,"Talvez compre em Vila Nova de Gaia no próximo ano, ainda a ver opções.",300000,,2,0,False,True,True,warm,buy
+lead_0134,website,Porto,Procuro casa para viver em Porto. Já vi várias e quero avançar com crédito habitação.,480000,14,11,3,False,True,True,hot_buy,buy
+lead_0135,instagram,Cascais,Just looking at the market in Cascais for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0136,referral,Porto,"Talvez compre em Porto no próximo ano, ainda a ver opções.",200000,180,5,2,False,True,True,warm,buy
+lead_0137,walk-in,Vila Nova de Gaia,Quero comprar em Vila Nova de Gaia mas o crédito ainda não está aprovado.,,120,4,1,False,False,True,warm,buy
+lead_0138,walk-in,Sintra,Thinking of selling in Sintra in the next two months. What is the process?,,45,4,0,True,True,True,hot_sell,sell
+lead_0139,referral,Cascais,Interested in buying near Cascais. Budget is ready. Can we book a viewing?,650000,60,13,5,False,True,True,hot_buy,buy
+lead_0140,walk-in,Sintra,Just looking at the market in Sintra for curiosity.,,,0,0,False,False,True,cold,unknown
+lead_0141,imovirtual,Lisboa,Crypto investment opportunity in Lisboa real estate guaranteed profit.,,,0,0,False,False,True,cold,unknown
+lead_0142,referral,Cascais,Crypto investment opportunity in Cascais real estate guaranteed profit.,,,1,0,False,False,True,cold,unknown
+lead_0143,walk-in,Oeiras,"Looking to rent a studio in Oeiras, no rush.",750,90,1,0,False,False,True,rent,rent
+lead_0144,website,Sintra,Crypto investment opportunity in Sintra real estate guaranteed profit.,,,1,0,False,False,True,cold,unknown
+lead_0145,website,Vila Nova de Gaia,Estou a comparar 4 T3 em Vila Nova de Gaia e gostava de uma proposta esta quinzena.,280000,60,21,8,True,True,True,hot_buy,buy
+lead_0146,instagram,Oeiras,Quero vender o meu T3 em Oeiras e preciso de uma avaliação esta semana.,,75,3,0,True,True,True,hot_sell,sell
+lead_0147,referral,Sintra,Just looking at the market in Sintra for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0148,walk-in,Braga,"Só a ver preços em Braga, sem pressa e sem orçamento.",,,1,0,False,False,True,cold,unknown
+lead_0149,idealista,Braga,Thinking of selling in Braga in the next two months. What is the process?,,75,2,0,True,True,True,hot_sell,sell
+lead_0150,instagram,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0151,imovirtual,Cascais,"Looking to rent a studio in Cascais, no rush.",750,30,3,0,False,False,True,rent,rent
+lead_0152,idealista,Porto,Procuro casa para viver em Porto. Já vi várias e quero avançar com crédito habitação.,650000,60,17,8,True,True,True,hot_buy,buy
+lead_0153,instagram,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,2,0,False,False,True,cold,unknown
+lead_0154,referral,Cascais,"Looking to rent a studio in Cascais, no rush.",750,90,6,1,False,False,True,rent,rent
+lead_0155,imovirtual,Coimbra,Crypto investment opportunity in Coimbra real estate guaranteed profit.,,,1,0,False,False,True,cold,unknown
+lead_0156,referral,Setúbal,Interested in buying near Setúbal. Budget is ready. Can we book a viewing?,350000,45,18,6,False,True,True,hot_buy,buy
+lead_0157,walk-in,Lisboa,Quero comprar em Lisboa mas o crédito ainda não está aprovado.,200000,120,3,1,False,False,True,warm,buy
+lead_0158,imovirtual,Vila Nova de Gaia,Quero vender o meu T3 em Vila Nova de Gaia e preciso de uma avaliação esta semana.,,75,3,0,True,True,True,hot_sell,sell
+lead_0159,referral,Setúbal,"Looking to rent a studio in Setúbal, no rush.",1200,30,5,2,False,False,True,rent,rent
+lead_0160,instagram,Oeiras,Quero vender o meu T3 em Oeiras e preciso de uma avaliação esta semana.,,45,1,0,True,True,True,hot_sell,sell
+lead_0161,instagram,Braga,"Procuro arrendamento em Braga para 12 meses, estudante.",1200,180,6,0,False,False,True,rent,rent
+lead_0162,imovirtual,Vila Nova de Gaia,"Procuro arrendamento em Vila Nova de Gaia para 12 meses, estudante.",900,90,1,2,False,False,True,rent,rent
+lead_0163,idealista,Lisboa,Quero vender o meu T3 em Lisboa e preciso de uma avaliação esta semana.,,75,3,0,True,True,True,hot_sell,sell
+lead_0164,imovirtual,Lisboa,"Gostava de vender em Lisboa daqui a uns 8 meses, podem contactar-me por email.",200000,270,3,1,False,False,True,warm,buy
+lead_0165,website,Sintra,"Só a ver preços em Sintra, sem pressa e sem orçamento.",,,1,0,False,False,True,cold,unknown
+lead_0166,walk-in,Faro,Herdámos um apartamento em Faro e queremos listar o mais rápido possível.,,75,3,0,True,True,True,hot_sell,sell
+lead_0167,walk-in,Lisboa,Quero comprar em Lisboa mas o crédito ainda não está aprovado.,200000,120,5,1,False,False,True,warm,buy
+lead_0168,instagram,Sintra,"Só a ver preços em Sintra, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0169,instagram,Cascais,"Procuro arrendamento em Cascais para 12 meses, estudante.",1200,90,5,0,False,False,True,rent,rent
+lead_0170,idealista,Braga,"Talvez compre em Braga no próximo ano, ainda a ver opções.",300000,270,7,1,False,True,True,warm,buy
+lead_0171,referral,Vila Nova de Gaia,Quero comprar em Vila Nova de Gaia mas o crédito ainda não está aprovado.,200000,120,2,0,False,True,True,warm,buy
+lead_0172,walk-in,Porto,Just looking at the market in Porto for curiosity.,,,2,0,False,False,True,cold,unknown
+lead_0173,instagram,Setúbal,"Só a ver preços em Setúbal, sem pressa e sem orçamento.",,,1,0,False,False,True,cold,unknown
+lead_0174,idealista,Sintra,"Looking to rent a studio in Sintra, no rush.",900,30,6,1,False,False,True,rent,rent
+lead_0175,instagram,Cascais,Herdámos um apartamento em Cascais e queremos listar o mais rápido possível.,,45,0,0,True,True,True,hot_sell,sell
+lead_0176,website,Setúbal,Just looking at the market in Setúbal for curiosity.,,,1,0,False,False,True,cold,unknown
+lead_0177,website,Lisboa,Crypto investment opportunity in Lisboa real estate guaranteed profit.,,,1,0,False,False,True,cold,unknown
+lead_0178,idealista,Lisboa,"Procuro arrendamento em Lisboa para 12 meses, estudante.",750,30,3,0,False,False,True,rent,rent
+lead_0179,walk-in,Lisboa,"Só a ver preços em Lisboa, sem pressa e sem orçamento.",,,0,0,False,False,True,cold,unknown
+lead_0180,website,Oeiras,Herdámos um apartamento em Oeiras e queremos listar o mais rápido possível.,,21,4,0,True,True,True,hot_sell,sell

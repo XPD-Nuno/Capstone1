@@ -1,0 +1,17 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.langsmith/
+.streamlit/secrets.toml
+*.log
+.DS_Store
+Thumbs.db
+charts/*.html
+!charts/.gitkeep
+data/*.pkl
+mvp/.streamlit/secrets.toml

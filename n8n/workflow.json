@@ -1,0 +1,89 @@
+{
+  "name": "Chleo Lead Score POC",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-score",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-lead",
+      "name": "Lead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "capstone-lead-score"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || $input.first().json;\nconst prompt = $env.LEAD_SCORING_PROMPT || 'See repo n8n/prompts/lead_scoring_v1.md';\nreturn [{\n  json: {\n    model: 'gpt-4o-mini',\n    temperature: 0,\n    response_format: { type: 'json_object' },\n    messages: [\n      { role: 'system', content: prompt },\n      { role: 'user', content: JSON.stringify(b) }\n    ],\n    lead_id: b.lead_id || 'unknown'\n  }\n}];"
+      },
+      "id": "code-build",
+      "name": "Build OpenAI Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $json.model, temperature: $json.temperature, response_format: $json.response_format, messages: $json.messages }) }}",
+        "options": {}
+      },
+      "id": "http-openai",
+      "name": "OpenAI Chat Completions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const root = $input.first().json;\nconst content = root.choices[0].message.content;\nlet parsed;\ntry { parsed = JSON.parse(content); } catch (e) {\n  parsed = { band: 'COLD', intent: 'unknown', rationale: 'Unparseable model output — fail closed', next_action: 'Human reviews raw payload', score_0_100: 0, used_banned_attribute: false };\n}\nparsed.model_version = root.model || 'gpt-4o-mini';\nparsed.usage_tokens = (root.usage || {}).total_tokens || null;\nreturn [{ json: parsed }];"
+      },
+      "id": "code-parse",
+      "name": "Parse JSON Fail Closed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Agent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [960, 0]
+    }
+  ],
+  "connections": {
+    "Lead Webhook": {
+      "main": [[{ "node": "Build OpenAI Payload", "type": "main", "index": 0 }]]
+    },
+    "Build OpenAI Payload": {
+      "main": [[{ "node": "OpenAI Chat Completions", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Completions": {
+      "main": [[{ "node": "Parse JSON Fail Closed", "type": "main", "index": 0 }]]
+    },
+    "Parse JSON Fail Closed": {
+      "main": [[{ "node": "Respond to Agent", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
