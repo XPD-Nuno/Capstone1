@@ -29,7 +29,7 @@ Round 1 answers Chleo’s transparency concern **on paper** (criteria + scored c
 | [presentation/](presentation/) | Round 1 and Round 2 slide outlines |
 | [src/](src/) | Shared scoring engine used by charts, eval, Python POC, and MVP |
 | [mvp/](mvp/) | Round 2 Streamlit + LangGraph app (HITL) |
-| [lead_desk/](lead_desk/) | Lead Desk vertical slice: intake → score → property match → agent packet → approve/reject (CLI) |
+| [lead_desk/](lead_desk/) | Lead Desk vertical slice: email/Telegram intake → score → Idealista/mock property match → agent packet → approve/reject (CLI) |
 | [docs/](docs/) | Round 2 consulting package (ROI, GDPR, EU AI Act, strategy, MVP/POC docs) |
 
 ## Round 1 — how to run
@@ -70,22 +70,22 @@ LangSmith experiment notes: [evaluation/langsmith.md](evaluation/langsmith.md).
 
 [`lead_desk/`](lead_desk/) is a self-contained package. It runs one path:
 
-1. Synthetic email / WhatsApp / Telegram payloads are normalized into a lead.
+1. Synthetic email and Telegram payloads are normalized into a lead.
 2. The lead is scored HOT / WARM / COLD with a plain-language reason.
-3. Matching properties are pulled from a mock inventory.
-4. An agent packet is printed.
+3. Matching properties are pulled from Idealista (with partner API credentials) or a mock inventory.
+4. An agent packet is printed on the CLI desk.
 5. The agent types approve or reject.
 
-Nothing is ever sent to the customer.
+Nothing is sent to customers or agents: the CLI desk is the only delivery channel for now.
 
 ```bash
 pip install -r lead_desk/requirements.txt
 python -m lead_desk demo                 # interactive: a / r / r <listing_id> / s per lead
-python -m lead_desk demo --notify all    # same packet through the Email/WhatsApp/Telegram agent notifiers (dry-run)
+python -m lead_desk demo --json          # also print the full packet JSON
 python -m pytest lead_desk/tests tests
 ```
 
-Channel variables, webhook stubs, IMAP intake and the scoring changes are documented in [lead_desk/README.md](lead_desk/README.md).
+Scoring rules, the Idealista provider (requires Idealista partner approval), the Telegram webhook stub and IMAP intake are documented in [lead_desk/README.md](lead_desk/README.md).
 
 ## Constraints
 

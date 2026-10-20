@@ -1,10 +1,19 @@
 from __future__ import annotations
 
+from urllib.parse import parse_qs
+
 import pytest
 
 from lead_desk.config import Settings
 from lead_desk.property_match.matcher import filters_for_lead, match_listings, passes
-from lead_desk.property_match.providers import MockInventoryProvider, PartnerApiProvider, ScrapeProvider, get_provider
+from lead_desk.property_match.providers import (
+    FallbackProvider,
+    IdealistaProvider,
+    MockInventoryProvider,
+    ProviderError,
+    ScrapeProvider,
+    get_provider,
+)
 from lead_desk.schema import Channel, Lead, Operation, SearchFilters, SearchPreferences, Typology
 from lead_desk.scoring import score_lead
 
@@ -60,12 +69,80 @@ def test_no_filters_for_sellers_or_unknown():
     assert filters_for_lead(lead, score_lead(lead)) is None
 
 
-def test_partner_and_scrape_providers_are_gated():
-    off = Settings()
-    assert isinstance(get_provider(off), MockInventoryProvider)
+def test_scrape_provider_is_gated():
     with pytest.raises(RuntimeError):
-        PartnerApiProvider(off)
-    with pytest.raises(RuntimeError):
-        ScrapeProvider(off)
+        ScrapeProvider(Settings())
     with pytest.raises(NotImplementedError):
         get_provider(Settings(feature_scrape_listings=True)).candidates(SearchFilters())
+
+
+IDEALISTA = Settings(idealista_api_key="key", idealista_api_secret="secret")
+
+IDEALISTA_RESPONSE = {"elementList": [
+    {"propertyCode": "33445566", "price": 372000.0, "size": 84.0, "rooms": 2, "province": "Lisboa",
+     "municipality": "Lisboa", "district": "Arroios", "neighborhood": "Pena", "latitude": 38.72,
+     "longitude": -9.135, "status": "good", "hasLift": True, "parkingSpace": {"hasParkingSpace": False}},
+    {"propertyCode": "77889900", "price": 455000.0, "size": 101.0, "rooms": 3, "province": "Lisboa",
+     "municipality": "Lisboa", "district": "Alvalade", "status": "newdevelopment", "hasLift": True},
+]}
+
+
+class FakeIdealista:
+    def __init__(self, fail_search=False):
+        self.calls = []
+        self.fail_search = fail_search
+
+    def __call__(self, method, url, headers, body):
+        self.calls.append((method, url, headers, parse_qs(body.decode())))
+        if url.endswith("/oauth/token"):
+            return {"access_token": "tok", "expires_in": 3600}
+        if self.fail_search:
+            raise ProviderError("HTTP 429")
+        return IDEALISTA_RESPONSE
+
+
+def test_idealista_absent_credentials_fall_back_to_mock():
+    assert isinstance(get_provider(Settings()), MockInventoryProvider)
+    with pytest.raises(ProviderError):
+        IdealistaProvider(Settings())
+
+
+def test_idealista_search_params_token_and_mapping():
+    http = FakeIdealista()
+    provider = get_provider(IDEALISTA, http=http)
+    assert isinstance(provider, FallbackProvider) and provider.name == "idealista+mock"
+    f = SearchFilters(concelho="Lisboa", typologies=[Typology.T2], max_price_eur=418_000, required_amenities=["lift"])
+    listings = provider.candidates(f)
+    token_call, search_call = http.calls
+    assert token_call[2]["Authorization"].startswith("Basic ") and token_call[3]["grant_type"] == ["client_credentials"]
+    assert search_call[1] == "https://api.idealista.com/3.5/pt/search"
+    assert search_call[2]["Authorization"] == "Bearer tok"
+    q = {k: v[0] for k, v in search_call[3].items()}
+    assert q["operation"] == "sale" and q["propertyType"] == "homes" and q["center"] == "38.7223,-9.1393"
+    assert (q["distance"], q["maxPrice"], q["bedrooms"], q["elevator"]) == ("10000", "418000", "2", "true")
+    first = listings[0]
+    assert first.listing_id == "idealista_33445566" and first.source == "idealista"
+    assert (first.concelho, first.freguesia, first.typology, first.price_eur, first.area_m2) == ("Lisboa", "Arroios", Typology.T2, 372_000, 84)
+    assert "lift" in first.amenities and listings[1].condition == "new"
+    ranked = match_listings(provider, f, 380_000)
+    assert [m.listing.listing_id for m in ranked] == ["idealista_33445566"]
+    provider.candidates(f)
+    assert len([c for c in http.calls if c[1].endswith("/oauth/token")]) == 1
+
+
+def test_idealista_needs_a_location_and_rent_operation():
+    p = IdealistaProvider(IDEALISTA, http=FakeIdealista())
+    assert p.search_params(SearchFilters(concelho="Nowhere")) is None
+    assert p.candidates(SearchFilters()) == []
+    q = p.search_params(SearchFilters(operation=Operation.RENT, center_lat=41.1, center_lon=-8.6, radius_km=2.5,
+                                      typologies=[Typology.T5_PLUS]))
+    assert (q["operation"], q["center"], q["distance"], q["bedrooms"]) == ("rent", "41.1,-8.6", "2500", "4")
+
+
+def test_idealista_error_falls_back_to_mock_with_warning():
+    warnings = []
+    provider = FallbackProvider(IdealistaProvider(IDEALISTA, http=FakeIdealista(fail_search=True)),
+                                MockInventoryProvider(), warn=warnings.append)
+    listings = provider.candidates(SearchFilters(concelho="Lisboa"))
+    assert listings and all(l.source == "mock" for l in listings)
+    assert "idealista unavailable" in warnings[0]

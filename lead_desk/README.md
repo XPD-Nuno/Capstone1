@@ -1,10 +1,12 @@
 # Lead Desk — vertical slice
 
-One path, end to end: **inbound message → normalize → score (HOT/WARM/COLD + why) → match properties → agent packet → agent approves or rejects**.
+One path, end to end: **inbound message → normalize → score (HOT/WARM/COLD + why) → match properties → agent packet on the CLI desk → agent approves or rejects**.
 
-- The system **never contacts the customer**. Notifiers (CLI / Email / WhatsApp / Telegram) tell the *agent* a packet is waiting. The agent copies the draft and sends it from their own WhatsApp, email or CRM.
-- Scoring uses operational signals only (intent, budget, timing, search activity, contactability). Nationality, neighbourhood and language ability are never inputs, and a guardrail blocks any system text that mentions a banned attribute.
-- All demo data is synthetic: `lead_*` ids, `@example.invalid` addresses, placeholder WhatsApp/Telegram ids, `mock_lst_*` listings.
+- **Nothing is sent to anyone.** The CLI desk is the only delivery channel. The agent copies the approved draft and sends it from their own email, phone or CRM. Outbound agent notifications (email, Telegram, ...) are deferred until the MVP has been tested on real situations; the `AgentNotifier` interface stays so they can return.
+- **Intake channels:** email (portal notifications and direct email, via IMAP or `.eml` files) and Telegram. WhatsApp is deferred until after real MVP tests.
+- **Scoring** uses operational signals only (intent, budget, timing, search activity, contactability). Nationality, neighbourhood and language ability are never inputs, and a guardrail blocks any system text that mentions a banned attribute.
+- **Listings:** Idealista Search API when credentials are set, otherwise a synthetic mock inventory.
+- All demo data is synthetic: `lead_*` ids, `@example.invalid` addresses, placeholder Telegram ids, `mock_lst_*` listings.
 - This is a first-pass build. It does not certify anything under GDPR or the EU AI Act.
 
 ## Run the demo
@@ -14,7 +16,7 @@ pip install -r lead_desk/requirements.txt
 python -m lead_desk demo
 ```
 
-The demo reads `lead_desk/data/synthetic_payloads.json` (7 payloads: Idealista-style email, direct email, WhatsApp Cloud API webhooks, Telegram updates). For each one it prints the agent packet and asks:
+The demo reads `lead_desk/data/synthetic_payloads.json`: 7 payloads made of an Idealista-style email, direct emails and Telegram updates. For each one it prints the agent packet and asks:
 
 ```
 [a]pprove | [r]eject | r <listing_id ...> reject listings & re-match | [s]kip
@@ -27,9 +29,8 @@ The demo reads `lead_desk/data/synthetic_payloads.json` (7 payloads: Idealista-s
 
 Useful flags:
 
-| Command | What it shows |
+| Command | What it does |
 | --- | --- |
-| `python -m lead_desk demo --notify all` | The same packet going through the CLI, Email, WhatsApp and Telegram notifiers. Without keys they run in dry-run, and every preview prints the packet's sha256 |
 | `python -m lead_desk demo --json` | Also prints the full packet JSON |
 | `python -m lead_desk demo --no-review` | No prompts (CI / screenshots) |
 | `printf 'a\nr\ns\n' \| python -m lead_desk demo` | Scripted decisions |
@@ -39,19 +40,39 @@ Useful flags:
 
 ```bash
 python -m lead_desk imap-poll --db lead_desk.sqlite3           # IMAP if configured, else data/sample_inbox/*.eml
-python -m lead_desk ingest --channel whatsapp --file payload.json --db lead_desk.sqlite3
-python -m lead_desk serve-webhooks --db lead_desk.sqlite3 --notify cli,telegram   # :8787
+python -m lead_desk ingest --channel telegram --file update.json --db lead_desk.sqlite3
+python -m lead_desk serve-webhooks --db lead_desk.sqlite3      # Telegram webhook stub on :8787
 python -m lead_desk review --db lead_desk.sqlite3              # approve/reject everything pending
 python -m lead_desk leads --db lead_desk.sqlite3 --band HOT
 ```
 
-Webhook endpoints (stdlib server, demo-grade; put it behind HTTPS before pointing Meta or Telegram at it):
+The webhook endpoint is `POST /webhooks/telegram`. It checks `X-Telegram-Bot-Api-Secret-Token` when `TELEGRAM_WEBHOOK_SECRET` is set. The server is a stdlib demo stub; put it behind HTTPS before pointing Telegram at it.
 
-| Endpoint | Check |
-| --- | --- |
-| `GET /webhooks/whatsapp` | Meta verification: `hub.verify_token` must equal `WHATSAPP_VERIFY_TOKEN` |
-| `POST /webhooks/whatsapp` | `X-Hub-Signature-256` HMAC is checked when `WHATSAPP_APP_SECRET` is set |
-| `POST /webhooks/telegram` | `X-Telegram-Bot-Api-Secret-Token` is checked when `TELEGRAM_WEBHOOK_SECRET` is set |
+## Scoring rules (`rules-v1.2`)
+
+| Band | When | Next action |
+| --- | --- | --- |
+| HOT | Buy/sell intent, score ≥ 70, (timeline ≤ 90 days or views ≥ 8 or saved ≥ 3), and a phone number or a previous reply | Call within 60 minutes |
+| WARM | Real interest that misses the HOT gate | Qualifying question, call this week |
+| WARM | Genuine rental intent. Never HOT, because of the lower commission | Lettings qualifying question, after HOT sales leads |
+| COLD | Email-only leads: reachable, but no phone number and no previous reply | Reply by email with one question and ask for a phone number. Do not phone |
+| COLD | Spam, browsing, or unclear intent with a low score | Low-frequency drip |
+
+These criteria will be revisited once Lead Desk runs on real situations.
+
+The bands and points come from the seed engine `src/scoring_engine.py`. `score_lead(lead, strict_policy=False)` still reproduces the seed `rules-v1` exactly, and a test checks this on all 180 synthetic leads. The differences from the seed are:
+
+1. The HOT gate from the written policy (`n8n/prompts/lead_scoring_v1.md`).
+2. The client decisions above on email-only leads and rentals.
+3. A few extra intent keywords that the synthetic data uses: "selling", "listar o/a", "pôr à venda", "buying", "purchase".
+4. Whole-word guardrail matching, so "terrace" no longer trips "race", plus the policy categories missing from the seed list.
+
+## Listings: Idealista first
+
+- **`IdealistaProvider`** calls the Idealista Search API v3.5: an OAuth2 client-credentials token, then `POST /3.5/pt/search`. The search uses the city centre plus a radius, and passes operation, price, size, bedrooms and the amenity flags (lift, garage, terrace, pool, A/C, storage room). Results become `idealista_<propertyCode>` listings.
+- **Idealista API access requires partner approval from Idealista.** Apply for API keys before expecting real listings. The free tier has a small monthly request quota; every search is counted in `usage_meters.listing_fetches`.
+- **Fallback:** with no `IDEALISTA_API_KEY` / `IDEALISTA_API_SECRET`, the mock inventory is used. If an Idealista call fails (network, quota), the desk warns on stderr and falls back to the mock inventory for that search. Each match line shows its source (`[idealista]` or `[mock]`).
+- **Scraping** stays disabled (`FEATURE_SCRAPE_LISTINGS=false`) until a ToS/legal review.
 
 ## Tests
 
@@ -61,14 +82,16 @@ python -m pytest lead_desk/tests tests
 
 The tests cover:
 
-- The seed eval cases (`data/eval_cases.jsonl`).
-- Exact parity with `src/scoring_engine.py` on all 180 synthetic leads in `rules-v1` mode.
-- `rules-v1.1` agreeing with the synthetic family labels on all 180 leads.
-- The email, WhatsApp and Telegram parsers.
+- The seed eval cases. `eval_03` is expected COLD under `rules-v1.2` because it is email-only.
+- Exact `rules-v1` parity with the Round 1 engine.
+- `rules-v1.2` against the synthetic family labels, adjusted for the email-only and rental decisions.
+- The email and Telegram parsers.
 - Filters and ranking.
+- Idealista request building and mapping, using a fake HTTP transport (no real API call).
+- Fallback to the mock inventory.
 - The guardrail.
-- Notifier dry-run and the refusal to notify the customer.
-- The approve/reject flow and webhook auth.
+- The CLI-only delivery.
+- The approve/reject flow and Telegram webhook auth.
 
 ## Configuration (`.env`)
 
@@ -78,19 +101,12 @@ Copy the repo-root `.env.example` to `.env`. Every variable is optional.
 | --- | --- |
 | `LEAD_DESK_DB_PATH` | SQLite file for `ingest` / `imap-poll` / `serve-webhooks` / `review` / `leads` |
 | `LEAD_DESK_TENANT_ID` | Tenant id stored on every row |
-| `LEAD_DESK_SALES_LED` | `true` = rent enquiries are parked as COLD and no rentals are matched |
 | `LEAD_DESK_MAX_MATCHES` | Listings per packet |
-| `LEAD_DESK_NOTIFY_LIVE` | **Master switch.** Even with credentials, notifiers stay in dry-run unless this is `true` |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `AGENT_EMAIL_TO` | Email notifier (STARTTLS). Sends the summary plus `packet.json` to the agent's inbox |
-| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_API_VERSION`, `AGENT_WHATSAPP_TO` | WhatsApp Cloud API text to the agent's own number. Meta only allows free text within 24 h of the agent messaging the business number; otherwise you need an approved template |
-| `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` | Inbound WhatsApp webhook verification and signature check |
-| `TELEGRAM_BOT_TOKEN`, `AGENT_TELEGRAM_CHAT_ID` | Telegram `sendMessage` to the agent's own chat (the agent must `/start` the bot first) |
-| `TELEGRAM_WEBHOOK_SECRET` | `secret_token` you pass to Telegram `setWebhook` |
+| `TELEGRAM_WEBHOOK_SECRET` | The `secret_token` you pass to Telegram `setWebhook` |
 | `IMAP_HOST`, `IMAP_PORT`, `IMAP_USER`, `IMAP_PASSWORD`, `IMAP_FOLDER` | Email intake (read-only: fetch UNSEEN) |
-| `FEATURE_PARTNER_LISTINGS_API` | Off. Partner feeds are not built yet (Phase D) |
-| `FEATURE_SCRAPE_LISTINGS` | Off. Scraping stays disabled until a ToS/legal review |
-
-Safety rule in code: every notifier refuses to deliver if its recipient equals the lead's own contact handle (`CustomerRecipientError`).
+| `IDEALISTA_API_KEY`, `IDEALISTA_API_SECRET` | Idealista Search API credentials (partner approval required). Unset means the mock inventory |
+| `IDEALISTA_COUNTRY`, `IDEALISTA_MAX_ITEMS`, `IDEALISTA_DEFAULT_RADIUS_KM` | Search country (`pt`), results per search (max 50), and radius around the lead's city |
+| `FEATURE_SCRAPE_LISTINGS` | Off |
 
 ## Layout
 
@@ -98,32 +114,15 @@ Safety rule in code: every notifier refuses to deliver if its recipient equals t
 lead_desk/
   schema.py            Lead, LeadScore, Listing, SearchFilters, AgentPacket (Pydantic)
   intake/extract.py    PT/EN extraction: budget, timeline, city, typology, m², amenities, phone, listing ref
-  intake/normalize.py  email | whatsapp | telegram -> Lead
-  intake/webhooks.py   WhatsApp / Telegram webhook stub
+  intake/normalize.py  email | telegram -> Lead
+  intake/webhooks.py   Telegram webhook stub
   intake/imap_poll.py  IMAP poll or .eml folder
-  scoring.py           deterministic HOT/WARM/COLD + rationale (rules-v1.1; rules-v1 = exact seed port)
+  scoring.py           deterministic HOT/WARM/COLD + rationale (rules-v1.2; rules-v1 = exact seed port)
   guardrail.py         banned-attribute check on rationale / next action / draft / notes
-  property_match/      provider interface (mock / partner API / scrape, gated) + filter & rank
+  property_match/      providers (Idealista, mock, scrape gated) + filter & rank
   packet.py            agent packet + draft reply (PT or EN)
-  notifiers.py         AgentNotifier: CLI | Email | WhatsApp | Telegram (dry-run by default)
+  notifiers.py         AgentNotifier interface + CLINotifier (the only delivery for now)
   hitl.py              approve / reject / reject-listing-and-rematch
   storage/             SQLite repository + schema_sqlite.sql + schema_postgres.sql
   data/                synthetic payloads, sample inbox, mock inventory
 ```
-
-## Scoring: what changed vs the seed (`src/scoring_engine.py`)
-
-`rules-v1.1` (default) keeps the seed points table and adds three things:
-
-1. **The HOT gate from the written policy** (`n8n/prompts/lead_scoring_v1.md`): buy/sell intent, **and** (timeline ≤ 90 days or views ≥ 8 or saved ≥ 3), **and** contactable (phone or already replied). A lead that scores 70 or more but fails the gate is held at WARM, and the rationale says why.
-2. **A few extra intent keywords** that the seed misses but `data/synthetic_leads.csv` uses: "selling", "listar o/a", "pôr à venda", "buying", "purchase".
-3. **Whole-word guardrail matching**, so "terrace" no longer trips "race", plus the remaining policy categories (ethnicity, disability, sexual orientation, family status) and the language-ability / neighbourhood proxies.
-
-`score_lead(lead, strict_policy=False)` reproduces the seed `rules-v1` exactly, and a test checks this.
-
-Results on the 180 synthetic leads, measured against their `synthetic_family` label:
-
-| Rules | Leads in the expected band |
-| --- | --- |
-| `rules-v1` (seed) | 148 / 180 |
-| `rules-v1.1` | 180 / 180 |
