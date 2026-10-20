@@ -122,6 +122,39 @@ class LeadRepository:
         )
         return [AgentPacket.model_validate_json(r["packet_json"]) for r in rows]
 
+    def get_packet(self, packet_id: str) -> tuple[AgentPacket, dict[str, Any]] | None:
+        """Packet plus its decision metadata (`decided_at`, `decided_by`)."""
+        row = self.conn.execute(
+            "SELECT packet_json, decided_at, decided_by FROM packets WHERE tenant_id = ? AND packet_id = ?",
+            (self.tenant_id, packet_id),
+        ).fetchone()
+        if not row:
+            return None
+        return AgentPacket.model_validate_json(row["packet_json"]), {"decided_at": row["decided_at"], "decided_by": row["decided_by"]}
+
+    def packets_for_lead(self, lead_id: str) -> list[tuple[AgentPacket, dict[str, Any]]]:
+        rows = self.conn.execute(
+            "SELECT packet_json, decided_at, decided_by FROM packets WHERE tenant_id = ? AND lead_id = ? ORDER BY created_at DESC",
+            (self.tenant_id, lead_id),
+        )
+        return [(AgentPacket.model_validate_json(r["packet_json"]), {"decided_at": r["decided_at"], "decided_by": r["decided_by"]})
+                for r in rows]
+
+    def latest_packets(self) -> list[tuple[AgentPacket, dict[str, Any]]]:
+        """The current packet for every lead: what the review queue shows."""
+        rows = self.conn.execute(
+            """
+            SELECT p.packet_json, p.decided_at, p.decided_by FROM packets p
+            WHERE p.tenant_id = ? AND p.created_at = (
+                SELECT MAX(p2.created_at) FROM packets p2 WHERE p2.tenant_id = p.tenant_id AND p2.lead_id = p.lead_id
+            )
+            ORDER BY p.created_at DESC
+            """,
+            (self.tenant_id,),
+        )
+        return [(AgentPacket.model_validate_json(r["packet_json"]), {"decided_at": r["decided_at"], "decided_by": r["decided_by"]})
+                for r in rows]
+
     def record_decision(self, packet: AgentPacket, status: PacketStatus, agent_id: str, note: str | None = None) -> AgentPacket:
         decided = packet.model_copy(update={"status": status, "decision_note": note})
         self.conn.execute(

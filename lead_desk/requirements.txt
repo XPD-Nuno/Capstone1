@@ -1,4 +1,8 @@
 # Lead Desk only needs these (stdlib covers SQLite, IMAP, HTTP).
 pydantic==2.10.4
 python-dotenv==1.0.1
+# Web dashboard backend (python -m lead_desk serve-api)
+fastapi==0.115.6
+uvicorn==0.34.0
 pytest>=8
+httpx>=0.27  # FastAPI TestClient

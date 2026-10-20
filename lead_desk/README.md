@@ -1,15 +1,50 @@
 # Lead Desk — vertical slice
 
-One path, end to end: **inbound message → normalize → score (HOT/WARM/COLD + why) → match properties → agent packet on the CLI desk → agent approves or rejects**.
+One path, end to end: **inbound message → normalize → score (HOT/WARM/COLD + why) → match properties → agent packet on the desk (web dashboard or CLI) → agent approves or rejects**.
 
-- **Nothing is sent to anyone.** The CLI desk is the only delivery channel. The agent copies the approved draft and sends it from their own email, phone or CRM. Outbound agent notifications (email, Telegram, ...) are deferred until the MVP has been tested on real situations; the `AgentNotifier` interface stays so they can return.
+- **Nothing is sent to anyone.** The desk (web dashboard or CLI) is the only delivery channel. The agent copies the approved draft and sends it from their own email, phone or CRM. Outbound agent notifications (email, Telegram, ...) are deferred until the MVP has been tested on real situations; the `AgentNotifier` interface stays so they can return.
 - **Intake channels:** email (portal notifications and direct email, via IMAP or `.eml` files) and Telegram. WhatsApp is deferred until after real MVP tests.
 - **Scoring** uses operational signals only (intent, budget, timing, search activity, contactability). Nationality, neighbourhood and language ability are never inputs, and a guardrail blocks any system text that mentions a banned attribute.
 - **Listings:** Idealista Search API when credentials are set, otherwise a synthetic mock inventory.
 - All demo data is synthetic: `lead_*` ids, `@example.invalid` addresses, placeholder Telegram ids, `mock_lst_*` listings.
 - This is a first-pass build. It does not certify anything under GDPR or the EU AI Act.
 
-## Run the demo
+## Run the web dashboard
+
+```bash
+pip install -r lead_desk/requirements.txt
+npm --prefix web install && npm --prefix web run build
+python -m lead_desk serve-api --seed-demo     # http://127.0.0.1:8000
+```
+
+The FastAPI backend (`lead_desk/api/app.py`) wraps the same `LeadDesk` pipeline and `hitl` functions as the CLI, and serves the built React app from `web/dist`. The dashboard has:
+
+- **Lead queue:** counts for needs-review / HOT / WARM / COLD (click to filter), search across lead id, city, message, typology and listings, status / channel / sort filters (kept in the URL), a table on desktop and cards on mobile.
+- **Lead detail:** score and band with the reasons behind them, the customer message and logistics notes, property matches, the draft reply with a copy button, and the decision history.
+- **Decisions:** approve, reject the whole packet (two clicks), or tick "Not a fit" on listings to exclude them and re-match. Decisions are signed with an agent id kept in the browser.
+
+Nothing is sent from the dashboard. Approving marks the packet; the agent copies the draft and sends it themselves. There is no login, so `serve-api` binds to `127.0.0.1` by default; put it behind an authenticating proxy before exposing it. `--db lead_desk.sqlite3` keeps data between runs (the default is in-memory).
+
+Frontend development with hot reload (the Vite dev server proxies `/api` to port 8000, or to `LEAD_DESK_API`):
+
+```bash
+python -m lead_desk serve-api --seed-demo      # terminal 1
+npm --prefix web run dev                       # terminal 2 -> http://localhost:5173
+```
+
+| Endpoint | What it does |
+| --- | --- |
+| `GET /api/stats` | Counts by band and status, and the active listings provider |
+| `GET /api/leads?band=&status=&channel=&q=&sort=priority\|newest\|score` | Current packet per lead, filtered and sorted |
+| `GET /api/leads/{lead_id}` | Current packet, decision, excluded listings, packet history, events |
+| `POST /api/packets/{id}/approve` | `{agent_id, note}`; 409 if already decided or blocked by the guardrail |
+| `POST /api/packets/{id}/reject` | `{agent_id, note, listing_ids}`; with `listing_ids` the lead is re-matched without them |
+| `POST /api/intake/{email\|telegram}` | `{payload, lead_id?, signals?}`: run one inbound message through the pipeline |
+| `POST /api/demo/load` | Load the synthetic demo leads that are not already on the desk |
+
+Interactive API docs are at `/docs`.
+
+## Run the CLI demo
 
 ```bash
 pip install -r lead_desk/requirements.txt
@@ -41,6 +76,7 @@ Useful flags:
 ```bash
 python -m lead_desk imap-poll --db lead_desk.sqlite3           # IMAP if configured, else data/sample_inbox/*.eml
 python -m lead_desk ingest --channel telegram --file update.json --db lead_desk.sqlite3
+python -m lead_desk serve-api --db lead_desk.sqlite3           # web dashboard + JSON API on :8000
 python -m lead_desk serve-webhooks --db lead_desk.sqlite3      # Telegram webhook stub on :8787
 python -m lead_desk review --db lead_desk.sqlite3              # approve/reject everything pending
 python -m lead_desk leads --db lead_desk.sqlite3 --band HOT
@@ -78,9 +114,11 @@ The bands and points come from the seed engine `src/scoring_engine.py`. `score_l
 
 ```bash
 python -m pytest lead_desk/tests tests
+npm --prefix web test            # Vitest: formatting, URL filters, queue and detail pages
+npm --prefix web run typecheck
 ```
 
-The tests cover:
+The Python tests cover:
 
 - The seed eval cases. `eval_03` is expected COLD under `rules-v1.2` because it is email-only.
 - Exact `rules-v1` parity with the Round 1 engine.
@@ -92,6 +130,9 @@ The tests cover:
 - The guardrail.
 - The CLI-only delivery.
 - The approve/reject flow and Telegram webhook auth.
+- The dashboard API: filters, search, sort, approve/reject conflicts, reject-listing re-match, intake and demo loading.
+
+The frontend tests use `web/src/test/fixtures.json`, a snapshot of real API responses for the synthetic demo leads.
 
 ## Configuration (`.env`)
 
@@ -123,6 +164,11 @@ lead_desk/
   packet.py            agent packet + draft reply (PT or EN)
   notifiers.py         AgentNotifier interface + CLINotifier (the only delivery for now)
   hitl.py              approve / reject / reject-listing-and-rematch
+  api/app.py           FastAPI backend for the dashboard (serves web/dist)
   storage/             SQLite repository + schema_sqlite.sql + schema_postgres.sql
   data/                synthetic payloads, sample inbox, mock inventory
+web/                   React + Vite + Tailwind dashboard
+  src/pages/           QueuePage (lead queue), LeadDetailPage (detail + decisions)
+  src/components/      badges, score ring, listing card, layout, toasts
+  src/api.ts           typed client for /api
 ```
