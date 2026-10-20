@@ -1,0 +1,4 @@
+# Lead Desk only needs these (stdlib covers SQLite, SMTP, IMAP, HTTP).
+pydantic==2.10.4
+python-dotenv==1.0.1
+pytest>=8

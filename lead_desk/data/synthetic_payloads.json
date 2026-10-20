@@ -1,0 +1,157 @@
+[
+  {
+    "lead_id": "lead_9001",
+    "channel": "email",
+    "note": "Idealista-style portal notification (raw RFC 822). HOT buyer.",
+    "signals": {
+      "property_views_7d": 12,
+      "saved_listings": 4
+    },
+    "payload": "From: Idealista <noreply@idealista.pt>\nTo: agency-inbox@example.invalid\nSubject: Novo contacto para o seu anúncio\nMessage-ID: <synthetic-9001@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nRecebeu um novo contacto através do idealista.\nEmail: lead_9001@example.invalid\nTelefone: [synthetic-redacted]\nMensagem: Quero comprar T2 em Lisboa. Orçamento 380 mil. Posso visitar amanhã à tarde. Gostava de ter elevador.\nAnúncio: https://www.idealista.pt/imovel/00000001/\n"
+  },
+  {
+    "lead_id": "lead_9002",
+    "channel": "whatsapp",
+    "note": "WhatsApp Cloud API webhook. HOT seller.",
+    "payload": {
+      "object": "whatsapp_business_account",
+      "entry": [
+        {
+          "id": "WABA_SYNTHETIC",
+          "changes": [
+            {
+              "field": "messages",
+              "value": {
+                "messaging_product": "whatsapp",
+                "metadata": {
+                  "display_phone_number": "000000000",
+                  "phone_number_id": "PHONE_ID_SYNTHETIC"
+                },
+                "contacts": [
+                  {
+                    "profile": {
+                      "name": "lead_9002"
+                    },
+                    "wa_id": "000009002"
+                  }
+                ],
+                "messages": [
+                  {
+                    "from": "000009002",
+                    "id": "wamid.SYNTHETIC9002",
+                    "timestamp": "1792000000",
+                    "type": "text",
+                    "text": {
+                      "body": "Boa tarde, quero vender o meu T3 no Porto e preciso de avaliação esta semana."
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "lead_id": "lead_9003",
+    "channel": "email",
+    "note": "Direct email (dict form). WARM buyer: slow timeline, no phone.",
+    "signals": {
+      "property_views_7d": 4,
+      "saved_listings": 1
+    },
+    "payload": {
+      "from": "lead_9003@example.invalid",
+      "subject": "Casa em Braga",
+      "body": "Talvez compre em Braga no próximo ano, ainda a ver opções. Orçamento 250 mil, T2 ou maior.",
+      "message_id": "<synthetic-9003@example.invalid>"
+    }
+  },
+  {
+    "lead_id": "lead_9004",
+    "channel": "telegram",
+    "note": "Telegram Update. COLD browsing.",
+    "payload": {
+      "update_id": 9004,
+      "message": {
+        "message_id": 1,
+        "from": {
+          "id": 900009004,
+          "is_bot": false,
+          "first_name": "lead_9004"
+        },
+        "chat": {
+          "id": 900009004,
+          "type": "private"
+        },
+        "date": 1792000000,
+        "text": "Só a ver preços em Faro, sem pressa e sem orçamento."
+      }
+    }
+  },
+  {
+    "lead_id": "lead_9005",
+    "channel": "whatsapp",
+    "note": "WhatsApp spam. COLD.",
+    "payload": {
+      "object": "whatsapp_business_account",
+      "entry": [
+        {
+          "id": "WABA_SYNTHETIC",
+          "changes": [
+            {
+              "field": "messages",
+              "value": {
+                "messaging_product": "whatsapp",
+                "messages": [
+                  {
+                    "from": "000009005",
+                    "id": "wamid.SYNTHETIC9005",
+                    "timestamp": "1792000000",
+                    "type": "text",
+                    "text": {
+                      "body": "Crypto investment opportunity in Lisboa real estate guaranteed profit."
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "lead_id": "lead_9006",
+    "channel": "email",
+    "note": "English direct email mentioning 'from abroad' — must be logistics only, never in the rationale. HOT buyer.",
+    "signals": {
+      "property_views_7d": 9,
+      "saved_listings": 5
+    },
+    "payload": "From: lead_9006 <lead_9006@example.invalid>\nTo: agency-inbox@example.invalid\nSubject: Buying in Cascais\nMessage-ID: <synthetic-9006@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nFamily from abroad wants to buy a T3 with garden in Cascais. Budget 720k, viewing this month.\nPhone: [synthetic-redacted]\n"
+  },
+  {
+    "lead_id": "lead_9007",
+    "channel": "telegram",
+    "note": "Telegram rent enquiry. COLD for a sales-led agency.",
+    "payload": {
+      "update_id": 9007,
+      "message": {
+        "message_id": 2,
+        "from": {
+          "id": 900009007,
+          "is_bot": false,
+          "first_name": "lead_9007"
+        },
+        "chat": {
+          "id": 900009007,
+          "type": "private"
+        },
+        "date": 1792000000,
+        "text": "Procuro arrendamento em Coimbra, T1 até 800 €, para entrar nos próximos 2 meses."
+      }
+    }
+  }
+]
