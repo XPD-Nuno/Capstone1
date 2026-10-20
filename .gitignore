@@ -16,3 +16,6 @@ charts/*.html
 data/*.pkl
 *.sqlite3
 mvp/.streamlit/secrets.toml
+web/node_modules/
+web/dist/
+web/*.tsbuildinfo

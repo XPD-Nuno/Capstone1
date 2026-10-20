@@ -1,0 +1,582 @@
+{
+ "stats": {
+  "total": 7,
+  "pending": 7,
+  "by_band": {
+   "HOT": 3,
+   "WARM": 1,
+   "COLD": 3
+  },
+  "by_status": {
+   "pending_review": 7,
+   "approved": 0,
+   "rejected": 0,
+   "blocked_guardrail": 0
+  },
+  "listings_provider": "mock"
+ },
+ "leads": [
+  {
+   "lead_id": "lead_9006",
+   "packet_id": "pkt_8abc38f71ce9",
+   "channel": "email",
+   "source": "direct_email",
+   "city": "Cascais",
+   "intent": "buy",
+   "band": "HOT",
+   "score": 92,
+   "status": "pending_review",
+   "budget_eur": 720000,
+   "timeline_days": 30,
+   "message_preview": "Buying in Cascais Family from abroad wants to buy a T3 with garden in Cascais. Budget 720k, viewing this month. Phone: [synthetic-redacted]",
+   "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+   "match_count": 1,
+   "received_at": "2026-10-20T19:13:25.160293Z",
+   "packet_created_at": "2026-10-20T19:13:25.160648Z",
+   "decided_at": null,
+   "decided_by": null
+  },
+  {
+   "lead_id": "lead_9001",
+   "packet_id": "pkt_3781f6b92852",
+   "channel": "email",
+   "source": "idealista",
+   "city": "Lisboa",
+   "intent": "buy",
+   "band": "HOT",
+   "score": 92,
+   "status": "pending_review",
+   "budget_eur": 380000,
+   "timeline_days": 1,
+   "message_preview": "Quero comprar T2 em Lisboa. Orçamento 380 mil. Posso visitar amanhã à tarde. Gostava de ter elevador.",
+   "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+   "match_count": 2,
+   "received_at": "2026-10-20T19:13:25.156287Z",
+   "packet_created_at": "2026-10-20T19:13:25.157026Z",
+   "decided_at": null,
+   "decided_by": null
+  },
+  {
+   "lead_id": "lead_9002",
+   "packet_id": "pkt_09f0e06c38ef",
+   "channel": "telegram",
+   "source": "telegram",
+   "city": "Porto",
+   "intent": "sell",
+   "band": "HOT",
+   "score": 77,
+   "status": "pending_review",
+   "budget_eur": null,
+   "timeline_days": 7,
+   "message_preview": "Boa tarde, quero vender o meu T3 no Porto e preciso de avaliação esta semana. Telefone: [synthetic-redacted]",
+   "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+   "match_count": 0,
+   "received_at": "2026-10-20T19:13:25.157580Z",
+   "packet_created_at": "2026-10-20T19:13:25.157800Z",
+   "decided_at": null,
+   "decided_by": null
+  },
+  {
+   "lead_id": "lead_9007",
+   "packet_id": "pkt_683fada634ac",
+   "channel": "telegram",
+   "source": "telegram",
+   "city": "Coimbra",
+   "intent": "rent",
+   "band": "WARM",
+   "score": 53,
+   "status": "pending_review",
+   "budget_eur": 800,
+   "timeline_days": 60,
+   "message_preview": "Procuro arrendamento em Coimbra, T1 até 800 €, para entrar nos próximos 2 meses.",
+   "next_action": "Lettings lead: send a short qualifying question (move-in date, budget) and book a call this week, after HOT sales leads.",
+   "match_count": 1,
+   "received_at": "2026-10-20T19:13:25.160991Z",
+   "packet_created_at": "2026-10-20T19:13:25.161302Z",
+   "decided_at": null,
+   "decided_by": null
+  },
+  {
+   "lead_id": "lead_9003",
+   "packet_id": "pkt_d00ca48400f5",
+   "channel": "email",
+   "source": "direct_email",
+   "city": "Braga",
+   "intent": "buy",
+   "band": "COLD",
+   "score": 66,
+   "status": "pending_review",
+   "budget_eur": 250000,
+   "timeline_days": 365,
+   "message_preview": "Casa em Braga Talvez compre em Braga no próximo ano, ainda a ver opções. Orçamento 250 mil, T2 ou maior.",
+   "next_action": "Reply by email with one qualifying question and ask for a phone number. Do not phone. Re-score when they answer.",
+   "match_count": 0,
+   "received_at": "2026-10-20T19:13:25.158145Z",
+   "packet_created_at": "2026-10-20T19:13:25.158365Z",
+   "decided_at": null,
+   "decided_by": null
+  },
+  {
+   "lead_id": "lead_9005",
+   "packet_id": "pkt_857e3c05e8d8",
+   "channel": "email",
+   "source": "direct_email",
+   "city": "Lisboa",
+   "intent": "unknown",
+   "band": "COLD",
+   "score": 0,
+   "status": "pending_review",
+   "budget_eur": null,
+   "timeline_days": null,
+   "message_preview": "Partnership Crypto investment opportunity in Lisboa real estate guaranteed profit.",
+   "next_action": "Park in a low-frequency drip. Do not phone. Review in 30 days if they return.",
+   "match_count": 0,
+   "received_at": "2026-10-20T19:13:25.159130Z",
+   "packet_created_at": "2026-10-20T19:13:25.159293Z",
+   "decided_at": null,
+   "decided_by": null
+  },
+  {
+   "lead_id": "lead_9004",
+   "packet_id": "pkt_5e42327d0e0d",
+   "channel": "telegram",
+   "source": "telegram",
+   "city": "Faro",
+   "intent": "unknown",
+   "band": "COLD",
+   "score": 0,
+   "status": "pending_review",
+   "budget_eur": null,
+   "timeline_days": null,
+   "message_preview": "Só a ver preços em Faro, sem pressa e sem orçamento.",
+   "next_action": "Park in a low-frequency drip. Do not phone. Review in 30 days if they return.",
+   "match_count": 0,
+   "received_at": "2026-10-20T19:13:25.158725Z",
+   "packet_created_at": "2026-10-20T19:13:25.158891Z",
+   "decided_at": null,
+   "decided_by": null
+  }
+ ],
+ "detail": {
+  "packet": {
+   "packet_id": "pkt_3781f6b92852",
+   "created_at": "2026-10-20T19:13:25.157026Z",
+   "audience": "agent_only",
+   "lead": {
+    "lead_id": "lead_9001",
+    "tenant_id": "tenant_demo",
+    "channel": "email",
+    "source": "idealista",
+    "received_at": "2026-10-20T19:13:25.156287Z",
+    "contact_handle": "lead_9001@example.invalid",
+    "dedup_key": "3d8217ad4e7857d9",
+    "portal_listing_ref": "00000001",
+    "city": "Lisboa",
+    "message": "Quero comprar T2 em Lisboa. Orçamento 380 mil. Posso visitar amanhã à tarde. Gostava de ter elevador.",
+    "budget_eur": 380000,
+    "timeline_days": 1,
+    "property_views_7d": 12,
+    "saved_listings": 4,
+    "replied_to_agent": false,
+    "phone_provided": true,
+    "email_provided": true,
+    "preferences": {
+     "typology": "T2",
+     "min_area_m2": null,
+     "amenities": [
+      "lift"
+     ]
+    },
+    "raw_ref": "<synthetic-9001@example.invalid>"
+   },
+   "score": {
+    "lead_id": "lead_9001",
+    "intent": "buy",
+    "band": "HOT",
+    "score_0_100": 92,
+    "rationale": "Score uses only operational signals (intent, budget, timing, search activity, contactability). clear buy intent in the message; budget is stated; timeline is within 90 days; recent search behaviour shows active comparison; lead is contactable or already in a conversation. Numeric score=92.",
+    "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+    "used_banned_attribute": false,
+    "model_version": "rules-v1.2"
+   },
+   "logistics_notes": [
+    "Enquiry references portal listing 00000001."
+   ],
+   "filters_used": {
+    "operation": "buy",
+    "district": null,
+    "concelho": "Lisboa",
+    "freguesia": null,
+    "center_lat": null,
+    "center_lon": null,
+    "radius_km": null,
+    "typologies": [
+     "T2"
+    ],
+    "min_rooms": null,
+    "max_rooms": null,
+    "min_price_eur": null,
+    "max_price_eur": 418000,
+    "max_condo_fee_eur": null,
+    "min_area_m2": null,
+    "max_area_m2": null,
+    "conditions": [],
+    "energy_classes": [],
+    "required_amenities": [
+     "lift"
+    ],
+    "exclude_listing_ids": []
+   },
+   "matches": [
+    {
+     "listing": {
+      "listing_id": "mock_lst_001",
+      "title": "T2 in Arroios, Lisboa (synthetic)",
+      "operation": "buy",
+      "district": "Lisboa",
+      "concelho": "Lisboa",
+      "freguesia": "Arroios",
+      "lat": 38.729,
+      "lon": -9.138,
+      "typology": "T2",
+      "rooms": 2,
+      "area_m2": 82,
+      "price_eur": 365000,
+      "condo_fee_eur": 60,
+      "condition": "renovated",
+      "energy_class": "C",
+      "amenities": [
+       "lift",
+       "balcony"
+      ],
+      "source": "mock"
+     },
+     "match_score": 78.8,
+     "reasons": [
+      "in Lisboa",
+      "T2 as requested",
+      "€365,000 is within the stated budget",
+      "has lift"
+     ]
+    },
+    {
+     "listing": {
+      "listing_id": "mock_lst_002",
+      "title": "T2 in Alvalade, Lisboa (synthetic)",
+      "operation": "buy",
+      "district": "Lisboa",
+      "concelho": "Lisboa",
+      "freguesia": "Alvalade",
+      "lat": 38.748,
+      "lon": -9.145,
+      "typology": "T2",
+      "rooms": 2,
+      "area_m2": 95,
+      "price_eur": 395000,
+      "condo_fee_eur": 75,
+      "condition": "used",
+      "energy_class": "B",
+      "amenities": [
+       "lift",
+       "parking"
+      ],
+      "source": "mock"
+     },
+     "match_score": 61.1,
+     "reasons": [
+      "in Lisboa",
+      "T2 as requested",
+      "€395,000 is up to 10% above the stated budget",
+      "has lift",
+      "energy class B"
+     ]
+    }
+   ],
+   "draft_reply_for_agent": "Olá! Obrigado pelo contacto. Selecionei 2 imóveis que correspondem ao que procura na zona de Lisboa:\n- T2 in Arroios, Lisboa (synthetic): €365,000, 82 m² (ref mock_lst_001)\n- T2 in Alvalade, Lisboa (synthetic): €395,000, 95 m² (ref mock_lst_002)\nQuando lhe dá jeito uma visita (presencial ou por videochamada)?",
+   "guardrail": {
+    "passed": true,
+    "hits": [],
+    "checked_fields": [
+     "draft_reply_for_agent",
+     "logistics_notes[0]",
+     "next_action",
+     "rationale"
+    ]
+   },
+   "status": "pending_review",
+   "decision_note": null
+  },
+  "decided_at": null,
+  "decided_by": null,
+  "rejected_listing_ids": [],
+  "packets": [
+   {
+    "packet_id": "pkt_3781f6b92852",
+    "status": "pending_review",
+    "created_at": "2026-10-20T19:13:25.157026Z",
+    "decided_at": null,
+    "decided_by": null,
+    "decision_note": null,
+    "listing_ids": [
+     "mock_lst_001",
+     "mock_lst_002"
+    ]
+   }
+  ],
+  "events": [
+   {
+    "event_type": "ingested",
+    "actor": "system",
+    "created_at": "2026-10-20T19:13:25.156582+00:00",
+    "payload": {
+     "channel": "email",
+     "raw_ref": "<synthetic-9001@example.invalid>"
+    }
+   },
+   {
+    "event_type": "scored",
+    "actor": "system",
+    "created_at": "2026-10-20T19:13:25.156740+00:00",
+    "payload": {
+     "lead_id": "lead_9001",
+     "intent": "buy",
+     "band": "HOT",
+     "score_0_100": 92,
+     "rationale": "Score uses only operational signals (intent, budget, timing, search activity, contactability). clear buy intent in the message; budget is stated; timeline is within 90 days; recent search behaviour shows active comparison; lead is contactable or already in a conversation. Numeric score=92.",
+     "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+     "used_banned_attribute": false,
+     "model_version": "rules-v1.2"
+    }
+   },
+   {
+    "event_type": "packet",
+    "actor": "system",
+    "created_at": "2026-10-20T19:13:25.157137+00:00",
+    "payload": {
+     "packet_id": "pkt_3781f6b92852",
+     "status": "pending_review",
+     "listing_ids": [
+      "mock_lst_001",
+      "mock_lst_002"
+     ]
+    }
+   }
+  ]
+ },
+ "approved": {
+  "packet": {
+   "packet_id": "pkt_3781f6b92852",
+   "created_at": "2026-10-20T19:13:25.157026Z",
+   "audience": "agent_only",
+   "lead": {
+    "lead_id": "lead_9001",
+    "tenant_id": "tenant_demo",
+    "channel": "email",
+    "source": "idealista",
+    "received_at": "2026-10-20T19:13:25.156287Z",
+    "contact_handle": "lead_9001@example.invalid",
+    "dedup_key": "3d8217ad4e7857d9",
+    "portal_listing_ref": "00000001",
+    "city": "Lisboa",
+    "message": "Quero comprar T2 em Lisboa. Orçamento 380 mil. Posso visitar amanhã à tarde. Gostava de ter elevador.",
+    "budget_eur": 380000,
+    "timeline_days": 1,
+    "property_views_7d": 12,
+    "saved_listings": 4,
+    "replied_to_agent": false,
+    "phone_provided": true,
+    "email_provided": true,
+    "preferences": {
+     "typology": "T2",
+     "min_area_m2": null,
+     "amenities": [
+      "lift"
+     ]
+    },
+    "raw_ref": "<synthetic-9001@example.invalid>"
+   },
+   "score": {
+    "lead_id": "lead_9001",
+    "intent": "buy",
+    "band": "HOT",
+    "score_0_100": 92,
+    "rationale": "Score uses only operational signals (intent, budget, timing, search activity, contactability). clear buy intent in the message; budget is stated; timeline is within 90 days; recent search behaviour shows active comparison; lead is contactable or already in a conversation. Numeric score=92.",
+    "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+    "used_banned_attribute": false,
+    "model_version": "rules-v1.2"
+   },
+   "logistics_notes": [
+    "Enquiry references portal listing 00000001."
+   ],
+   "filters_used": {
+    "operation": "buy",
+    "district": null,
+    "concelho": "Lisboa",
+    "freguesia": null,
+    "center_lat": null,
+    "center_lon": null,
+    "radius_km": null,
+    "typologies": [
+     "T2"
+    ],
+    "min_rooms": null,
+    "max_rooms": null,
+    "min_price_eur": null,
+    "max_price_eur": 418000,
+    "max_condo_fee_eur": null,
+    "min_area_m2": null,
+    "max_area_m2": null,
+    "conditions": [],
+    "energy_classes": [],
+    "required_amenities": [
+     "lift"
+    ],
+    "exclude_listing_ids": []
+   },
+   "matches": [
+    {
+     "listing": {
+      "listing_id": "mock_lst_001",
+      "title": "T2 in Arroios, Lisboa (synthetic)",
+      "operation": "buy",
+      "district": "Lisboa",
+      "concelho": "Lisboa",
+      "freguesia": "Arroios",
+      "lat": 38.729,
+      "lon": -9.138,
+      "typology": "T2",
+      "rooms": 2,
+      "area_m2": 82,
+      "price_eur": 365000,
+      "condo_fee_eur": 60,
+      "condition": "renovated",
+      "energy_class": "C",
+      "amenities": [
+       "lift",
+       "balcony"
+      ],
+      "source": "mock"
+     },
+     "match_score": 78.8,
+     "reasons": [
+      "in Lisboa",
+      "T2 as requested",
+      "€365,000 is within the stated budget",
+      "has lift"
+     ]
+    },
+    {
+     "listing": {
+      "listing_id": "mock_lst_002",
+      "title": "T2 in Alvalade, Lisboa (synthetic)",
+      "operation": "buy",
+      "district": "Lisboa",
+      "concelho": "Lisboa",
+      "freguesia": "Alvalade",
+      "lat": 38.748,
+      "lon": -9.145,
+      "typology": "T2",
+      "rooms": 2,
+      "area_m2": 95,
+      "price_eur": 395000,
+      "condo_fee_eur": 75,
+      "condition": "used",
+      "energy_class": "B",
+      "amenities": [
+       "lift",
+       "parking"
+      ],
+      "source": "mock"
+     },
+     "match_score": 61.1,
+     "reasons": [
+      "in Lisboa",
+      "T2 as requested",
+      "€395,000 is up to 10% above the stated budget",
+      "has lift",
+      "energy class B"
+     ]
+    }
+   ],
+   "draft_reply_for_agent": "Olá! Obrigado pelo contacto. Selecionei 2 imóveis que correspondem ao que procura na zona de Lisboa:\n- T2 in Arroios, Lisboa (synthetic): €365,000, 82 m² (ref mock_lst_001)\n- T2 in Alvalade, Lisboa (synthetic): €395,000, 95 m² (ref mock_lst_002)\nQuando lhe dá jeito uma visita (presencial ou por videochamada)?",
+   "guardrail": {
+    "passed": true,
+    "hits": [],
+    "checked_fields": [
+     "draft_reply_for_agent",
+     "logistics_notes[0]",
+     "next_action",
+     "rationale"
+    ]
+   },
+   "status": "approved",
+   "decision_note": "approved to present listings"
+  },
+  "decided_at": "2026-10-20T19:13:25.181883+00:00",
+  "decided_by": "agent_demo",
+  "rejected_listing_ids": [],
+  "packets": [
+   {
+    "packet_id": "pkt_3781f6b92852",
+    "status": "approved",
+    "created_at": "2026-10-20T19:13:25.157026Z",
+    "decided_at": "2026-10-20T19:13:25.181883+00:00",
+    "decided_by": "agent_demo",
+    "decision_note": "approved to present listings",
+    "listing_ids": [
+     "mock_lst_001",
+     "mock_lst_002"
+    ]
+   }
+  ],
+  "events": [
+   {
+    "event_type": "ingested",
+    "actor": "system",
+    "created_at": "2026-10-20T19:13:25.156582+00:00",
+    "payload": {
+     "channel": "email",
+     "raw_ref": "<synthetic-9001@example.invalid>"
+    }
+   },
+   {
+    "event_type": "scored",
+    "actor": "system",
+    "created_at": "2026-10-20T19:13:25.156740+00:00",
+    "payload": {
+     "lead_id": "lead_9001",
+     "intent": "buy",
+     "band": "HOT",
+     "score_0_100": 92,
+     "rationale": "Score uses only operational signals (intent, budget, timing, search activity, contactability). clear buy intent in the message; budget is stated; timeline is within 90 days; recent search behaviour shows active comparison; lead is contactable or already in a conversation. Numeric score=92.",
+     "next_action": "Agent calls within 60 minutes and offers a viewing or listing appointment.",
+     "used_banned_attribute": false,
+     "model_version": "rules-v1.2"
+    }
+   },
+   {
+    "event_type": "packet",
+    "actor": "system",
+    "created_at": "2026-10-20T19:13:25.157137+00:00",
+    "payload": {
+     "packet_id": "pkt_3781f6b92852",
+     "status": "pending_review",
+     "listing_ids": [
+      "mock_lst_001",
+      "mock_lst_002"
+     ]
+    }
+   },
+   {
+    "event_type": "decision",
+    "actor": "agent:agent_demo",
+    "created_at": "2026-10-20T19:13:25.181939+00:00",
+    "payload": {
+     "packet_id": "pkt_3781f6b92852",
+     "status": "approved",
+     "note": "approved to present listings"
+    }
+   }
+  ]
+ }
+}
