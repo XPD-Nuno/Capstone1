@@ -7,14 +7,18 @@ import pytest
 from conftest import ROOT, eval_case_to_lead
 from lead_desk.guardrail import find_banned_terms
 from lead_desk.schema import Band, Channel, Intent, Lead
-from lead_desk.scoring import detect_intent, logistics_notes, score_lead
+from lead_desk.scoring import detect_intent, is_email_only, logistics_notes, score_lead
+
+# Client decision (Oct 2026): email-only leads are banded COLD. eval_03 has email but no phone and no reply.
+V12_OVERRIDES = {"eval_03": "COLD"}
 
 
 @pytest.mark.parametrize("strict", [True, False])
 def test_seed_eval_cases(eval_cases, strict):
     for case in eval_cases:
         score = score_lead(eval_case_to_lead(case), strict_policy=strict)
-        assert score.band.value == case["expected_band"], (case["lead_id"], score.score_0_100, score.rationale)
+        expected = V12_OVERRIDES.get(case["lead_id"], case["expected_band"]) if strict else case["expected_band"]
+        assert score.band.value == expected, (case["lead_id"], score.score_0_100, score.rationale)
         assert score.intent.value == case["expected_intent"], case["lead_id"]
         assert score.used_banned_attribute is False
 
@@ -53,23 +57,21 @@ def test_non_strict_mode_is_exact_port_of_round1_engine():
             theirs.band.value, theirs.intent.value, theirs.score_0_100, theirs.next_action), row["lead_id"]
 
 
-FAMILY_BAND = {"hot_buy": "HOT", "hot_sell": "HOT", "warm": "WARM", "cold": "COLD", "rent": "COLD"}
+FAMILY_BAND = {"hot_buy": "HOT", "hot_sell": "HOT", "warm": "WARM", "cold": "COLD", "rent": "WARM"}
 
 
-def test_strict_policy_matches_synthetic_family_labels():
+def test_strict_policy_matches_synthetic_family_labels_after_client_decisions():
+    """Family label, except email-only leads are COLD and rentals are WARM (data generator predates both)."""
     with (ROOT / "data" / "synthetic_leads.csv").open(encoding="utf-8-sig") as handle:
         rows = list(csv.DictReader(handle))
-    loose_hits = 0
     for row in rows:
         lead = _csv_lead(row)
-        expected = FAMILY_BAND[row["synthetic_family"]]
+        expected = "COLD" if is_email_only(lead) else FAMILY_BAND[row["synthetic_family"]]
         assert score_lead(lead).band.value == expected, (row["lead_id"], row["message"])
-        loose_hits += score_lead(lead, strict_policy=False).band.value == expected
-    assert loose_hits < len(rows)
 
 
 def _lead(**kw) -> Lead:
-    base = dict(lead_id="lead_t1", channel=Channel.EMAIL, message="Quero comprar T2 em Lisboa", budget_eur=300000)
+    base = dict(lead_id="lead_t1", channel=Channel.TELEGRAM, message="Quero comprar T2 em Lisboa", budget_eur=300000)
     return Lead(**(base | kw))
 
 
@@ -89,10 +91,25 @@ def test_hot_requires_near_timeline_or_strong_activity():
     assert score_lead(lead.model_copy(update={"saved_listings": 3})).band == Band.HOT
 
 
-def test_rent_is_cold_only_for_sales_led_agency():
-    lead = _lead(message="Quero arrendar T1 em Coimbra", budget_eur=800, timeline_days=30, phone_provided=True)
-    assert score_lead(lead).band == Band.COLD
-    assert score_lead(lead, sales_led=False).band == Band.WARM
+def test_genuine_rent_is_warm_never_hot():
+    lead = _lead(message="Quero arrendar T1 em Coimbra", budget_eur=800, timeline_days=7, phone_provided=True,
+                 property_views_7d=20, saved_listings=9, replied_to_agent=True)
+    score = score_lead(lead)
+    assert score.band == Band.WARM and "Lettings" in score.next_action
+    assert score_lead(_lead(message="Procuro arrendamento em Lisboa", budget_eur=None)).band == Band.WARM
+    assert score_lead(_lead(message="Só a ver arrendamentos, sem pressa", budget_eur=None)).band == Band.COLD
+    assert score_lead(lead.model_copy(update={"message": "rent crypto guaranteed profit"})).band == Band.COLD
+
+
+def test_email_only_is_contactable_but_cold():
+    lead = _lead(channel=Channel.EMAIL, email_provided=True, timeline_days=14, saved_listings=5)
+    assert is_email_only(lead)
+    score = score_lead(lead)
+    assert score.band == Band.COLD
+    assert "email" in score.next_action.lower() and "Do not phone" in score.next_action
+    assert "reachable by email only" in score.rationale
+    assert score_lead(lead.model_copy(update={"phone_provided": True})).band == Band.HOT
+    assert score_lead(lead.model_copy(update={"replied_to_agent": True})).band == Band.HOT
 
 
 def test_spam_never_hot():

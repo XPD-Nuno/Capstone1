@@ -1,6 +1,6 @@
 """Shared Pydantic models for the Lead Desk pipeline.
 
-Every adapter (email / WhatsApp / Telegram / synthetic file) normalizes into `Lead`.
+Every adapter (email / Telegram / synthetic file) normalizes into `Lead`.
 Everything downstream (scoring, matching, packets, notifiers, repository) only sees `Lead`.
 """
 
@@ -19,7 +19,6 @@ def utcnow() -> datetime:
 
 class Channel(str, Enum):
     EMAIL = "email"
-    WHATSAPP = "whatsapp"
     TELEGRAM = "telegram"
 
 
@@ -104,7 +103,7 @@ class LeadScore(BaseModel):
     rationale: str
     next_action: str
     used_banned_attribute: bool = False
-    model_version: str = "rules-v1.1"
+    model_version: str = "rules-v1.2"
 
     @field_validator("rationale")
     @classmethod

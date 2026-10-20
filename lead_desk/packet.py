@@ -7,6 +7,7 @@ import uuid
 
 from .guardrail import check_fields
 from .schema import AgentPacket, Band, Intent, Lead, LeadScore, ListingMatch, PacketStatus, SearchFilters
+from .scoring import NEXT_ACTIONS
 
 _PT_MARKERS = re.compile(r"\b(quero|procuro|olá|ola|obrigad[oa]|casa|comprar|vender|arrendar|orçamento|visita|imóvel|preços|sem)\b", re.IGNORECASE)
 
@@ -25,6 +26,11 @@ def draft_reply(lead: Lead, score: LeadScore, matches: list[ListingMatch]) -> st
     pt = is_portuguese(lead.message)
     where = f" na zona de {lead.city}" if pt and lead.city else (f" in {lead.city}" if lead.city else "")
     n = len(matches)
+    if score.next_action == NEXT_ACTIONS["email_only"]:
+        return (f"Olá! Obrigado pelo contacto. Para o ajudar{where}, pode indicar-me o orçamento e quando pretende "
+                "avançar? Se preferir, deixe-me um número de telefone e ligo-lhe." if pt else
+                f"Hello, thanks for your enquiry. To help you{where}, could you share your budget and timing? "
+                "If you prefer, leave a phone number and I will call you.")
     if score.band == Band.COLD:
         return ("(Sem resposta recomendada agora — lead em drip de baixa frequência.)" if pt
                 else "(No reply recommended now — lead parked in a low-frequency drip.)")

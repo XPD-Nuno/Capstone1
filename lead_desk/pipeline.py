@@ -24,12 +24,10 @@ class LeadDesk:
         self.provider = provider or get_provider(settings)
 
     def _should_match(self, band: Band, intent: Intent) -> bool:
-        if band == Band.COLD:
-            return False
-        return intent == Intent.BUY or (intent == Intent.RENT and not self.settings.agency_sales_led)
+        return band != Band.COLD and intent in (Intent.BUY, Intent.RENT)
 
     def build(self, lead: Lead) -> AgentPacket:
-        score = score_lead(lead, sales_led=self.settings.agency_sales_led)
+        score = score_lead(lead)
         self.repo.record_score(score)
         self.repo.bump_usage("scores")
         filters, matches = None, []
@@ -47,8 +45,7 @@ class LeadDesk:
         for notifier in self.notifiers:
             result = notifier.notify(packet)
             self.repo.add_event(packet.lead.lead_id, "notified", {
-                "packet_id": packet.packet_id, "channel": result.channel, "dry_run": result.dry_run,
-                "packet_sha256": result.packet_sha256, "detail": result.detail,
+                "packet_id": packet.packet_id, "channel": result.channel, "packet_sha256": result.packet_sha256, "detail": result.detail,
             })
             results.append(result)
         self.repo.bump_usage("notifications", len(results))
