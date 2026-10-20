@@ -278,7 +278,7 @@ export function QueuePage() {
             className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none"
           />
         </label>
-        <div className="grid grid-cols-3 gap-2 lg:flex">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex">
           <select
             aria-label="Status"
             value={filters.status}
@@ -305,7 +305,7 @@ export function QueuePage() {
             aria-label="Sort"
             value={filters.sort}
             onChange={(e) => update({ sort: e.target.value as LeadFilters["sort"] })}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+            className="col-span-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm sm:col-span-1"
           >
             <option value="priority">Priority</option>
             <option value="newest">Newest</option>
