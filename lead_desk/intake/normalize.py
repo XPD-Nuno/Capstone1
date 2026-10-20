@@ -1,9 +1,10 @@
-"""Channel adapters: email | whatsapp | telegram -> `Lead`.
+"""Channel adapters: email | telegram -> `Lead`.
 
 Each parser accepts the channel's native payload shape:
 - email: raw RFC 822 text/bytes (what IMAP returns) or a simple dict {from, subject, body, message_id}
-- whatsapp: WhatsApp Business Cloud API webhook body (entry[].changes[].value.messages[])
 - telegram: Telegram Bot API `Update` object
+
+WhatsApp intake is deferred until after real MVP tests.
 """
 
 from __future__ import annotations
@@ -42,10 +43,10 @@ def dedup_key_for(channel: Channel, handle: str | None) -> str | None:
     if not handle:
         return None
     norm = handle.strip().lower()
-    if channel in (Channel.WHATSAPP,) or re.fullmatch(r"\+?[\d\s.-]{7,}", norm):
-        norm = "tel:" + re.sub(r"\D", "", norm)
-    elif channel == Channel.TELEGRAM:
+    if channel == Channel.TELEGRAM:
         norm = "tg:" + norm
+    elif re.fullmatch(r"\+?[\d\s.-]{7,}", norm):
+        norm = "tel:" + re.sub(r"\D", "", norm)
     else:
         norm = "mail:" + norm
     return hashlib.sha256(norm.encode()).hexdigest()[:16]
@@ -174,30 +175,6 @@ def parse_email(payload: str | bytes | dict[str, Any], *, tenant_id: str = "tena
     )
 
 
-# ---------------------------------------------------------------- whatsapp
-
-
-def parse_whatsapp(payload: dict[str, Any], *, tenant_id: str = "tenant_demo",
-                   lead_id: str | None = None, signals: dict[str, Any] | None = None) -> list[Lead]:
-    """Returns one Lead per inbound text message. Status callbacks and media are ignored."""
-    if payload.get("object") != "whatsapp_business_account":
-        raise NormalizeError("whatsapp: not a whatsapp_business_account webhook")
-    leads: list[Lead] = []
-    for entry in payload.get("entry", []):
-        for change in entry.get("changes", []):
-            value = change.get("value", {})
-            for msg in value.get("messages", []):
-                if msg.get("type") != "text":
-                    continue
-                leads.append(_build_lead(
-                    channel=Channel.WHATSAPP, message=msg.get("text", {}).get("body", ""),
-                    handle=msg.get("from"), source="whatsapp", raw_ref=msg.get("id"),
-                    tenant_id=tenant_id, lead_id=lead_id, replied="context" in msg,
-                    phone=True, signals=signals,
-                ))
-    return leads
-
-
 # ---------------------------------------------------------------- telegram
 
 
@@ -224,7 +201,5 @@ def normalize(channel: str | Channel, payload: Any, *, tenant_id: str = "tenant_
     kwargs = dict(tenant_id=tenant_id, lead_id=lead_id, signals=signals)
     if ch == Channel.EMAIL:
         return [parse_email(payload, **kwargs)]
-    if ch == Channel.WHATSAPP:
-        return parse_whatsapp(payload, **kwargs)
     lead = parse_telegram(payload, **kwargs)
     return [lead] if lead else []

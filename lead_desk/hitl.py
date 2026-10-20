@@ -31,7 +31,7 @@ def review_packet(desk: LeadDesk, packet: AgentPacket, *, agent_id: str = "agent
                 continue
             packet = desk.repo.record_decision(packet, PacketStatus.APPROVED, agent_id, note="approved to present listings")
             out(f"  APPROVED by {agent_id}. Nothing was sent to the customer — copy the draft and send it "
-                "yourself from your own WhatsApp / email / CRM.")
+                "yourself from your own phone, email or CRM.")
             return packet
 
         if cmd in ("r", "reject"):

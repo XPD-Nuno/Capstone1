@@ -15,7 +15,7 @@ from lead_desk.intake.extract import (
     mentions_phone,
 )
 from lead_desk.intake.imap_poll import read_eml_dir
-from lead_desk.intake.normalize import NormalizeError, normalize, parse_email, parse_telegram, parse_whatsapp
+from lead_desk.intake.normalize import NormalizeError, normalize, parse_email, parse_telegram
 from lead_desk.schema import Channel, Typology
 
 PAYLOADS = json.loads((ROOT / "lead_desk" / "data" / "synthetic_payloads.json").read_text(encoding="utf-8"))
@@ -101,30 +101,16 @@ def test_sample_inbox_eml_files():
     assert all(l.lead_id.startswith("lead_") for l in leads.values())
 
 
-def test_whatsapp_cloud_webhook():
+def test_telegram_message_with_phone_line():
     env = PAYLOADS[1]
-    [lead] = parse_whatsapp(env["payload"], lead_id=env["lead_id"])
-    assert lead.channel == Channel.WHATSAPP and lead.phone_provided
-    assert lead.raw_ref == "wamid.SYNTHETIC9002"
-    assert lead.city == "Porto" and lead.timeline_days == 7
+    lead = parse_telegram(env["payload"], lead_id=env["lead_id"])
+    assert lead.channel == Channel.TELEGRAM and lead.phone_provided and not lead.email_provided
+    assert lead.city == "Porto" and lead.timeline_days == 7 and lead.raw_ref == "tg:9002"
 
 
-def test_whatsapp_ignores_status_and_media_and_reads_multiple():
-    payload = {"object": "whatsapp_business_account", "entry": [{"changes": [{"value": {
-        "statuses": [{"id": "wamid.S", "status": "delivered"}],
-        "messages": [
-            {"from": "000000001", "id": "wamid.A", "type": "image", "image": {"id": "x"}},
-            {"from": "000000001", "id": "wamid.B", "type": "text", "text": {"body": "Quero comprar T1 no Porto"}},
-            {"from": "000000002", "id": "wamid.C", "type": "text", "text": {"body": "Quero vender"},
-             "context": {"id": "wamid.prev"}},
-        ]}}]}]}
-    leads = parse_whatsapp(payload)
-    assert [l.raw_ref for l in leads] == ["wamid.B", "wamid.C"]
-    assert leads[0].lead_id != leads[1].lead_id
-    assert leads[1].replied_to_agent is True
-    assert parse_whatsapp({"object": "whatsapp_business_account", "entry": []}) == []
-    with pytest.raises(NormalizeError):
-        parse_whatsapp({"object": "page"})
+def test_whatsapp_is_not_an_intake_channel():
+    with pytest.raises(ValueError):
+        normalize("whatsapp", {"object": "whatsapp_business_account", "entry": []})
 
 
 def test_telegram_update():

@@ -11,52 +11,30 @@
   },
   {
     "lead_id": "lead_9002",
-    "channel": "whatsapp",
-    "note": "WhatsApp Cloud API webhook. HOT seller.",
+    "channel": "telegram",
+    "note": "Telegram Update with a phone line. HOT seller.",
     "payload": {
-      "object": "whatsapp_business_account",
-      "entry": [
-        {
-          "id": "WABA_SYNTHETIC",
-          "changes": [
-            {
-              "field": "messages",
-              "value": {
-                "messaging_product": "whatsapp",
-                "metadata": {
-                  "display_phone_number": "000000000",
-                  "phone_number_id": "PHONE_ID_SYNTHETIC"
-                },
-                "contacts": [
-                  {
-                    "profile": {
-                      "name": "lead_9002"
-                    },
-                    "wa_id": "000009002"
-                  }
-                ],
-                "messages": [
-                  {
-                    "from": "000009002",
-                    "id": "wamid.SYNTHETIC9002",
-                    "timestamp": "1792000000",
-                    "type": "text",
-                    "text": {
-                      "body": "Boa tarde, quero vender o meu T3 no Porto e preciso de avaliação esta semana."
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      ]
+      "update_id": 9002,
+      "message": {
+        "message_id": 3,
+        "from": {
+          "id": 900009002,
+          "is_bot": false,
+          "first_name": "lead_9002"
+        },
+        "chat": {
+          "id": 900009002,
+          "type": "private"
+        },
+        "date": 1792000000,
+        "text": "Boa tarde, quero vender o meu T3 no Porto e preciso de avaliação esta semana.\nTelefone: [synthetic-redacted]"
+      }
     }
   },
   {
     "lead_id": "lead_9003",
     "channel": "email",
-    "note": "Direct email (dict form). WARM buyer: slow timeline, no phone.",
+    "note": "Direct email (dict form), email only: no phone, no reply. COLD (reachable by email).",
     "signals": {
       "property_views_7d": 4,
       "saved_listings": 1
@@ -92,34 +70,13 @@
   },
   {
     "lead_id": "lead_9005",
-    "channel": "whatsapp",
-    "note": "WhatsApp spam. COLD.",
+    "channel": "email",
+    "note": "Spam email. COLD.",
     "payload": {
-      "object": "whatsapp_business_account",
-      "entry": [
-        {
-          "id": "WABA_SYNTHETIC",
-          "changes": [
-            {
-              "field": "messages",
-              "value": {
-                "messaging_product": "whatsapp",
-                "messages": [
-                  {
-                    "from": "000009005",
-                    "id": "wamid.SYNTHETIC9005",
-                    "timestamp": "1792000000",
-                    "type": "text",
-                    "text": {
-                      "body": "Crypto investment opportunity in Lisboa real estate guaranteed profit."
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      ]
+      "from": "lead_9005@example.invalid",
+      "subject": "Partnership",
+      "body": "Crypto investment opportunity in Lisboa real estate guaranteed profit.",
+      "message_id": "<synthetic-9005@example.invalid>"
     }
   },
   {
@@ -135,7 +92,7 @@
   {
     "lead_id": "lead_9007",
     "channel": "telegram",
-    "note": "Telegram rent enquiry. COLD for a sales-led agency.",
+    "note": "Telegram rent enquiry with genuine intent. WARM (rentals never HOT).",
     "payload": {
       "update_id": 9007,
       "message": {

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import hashlib
-import hmac
 import json
 
 import pytest
@@ -12,14 +10,7 @@ from lead_desk.config import Settings
 from lead_desk.guardrail import check_fields, find_banned_terms
 from lead_desk.hitl import review_packet
 from lead_desk.intake.webhooks import handle_webhook
-from lead_desk.notifiers import (
-    CustomerRecipientError,
-    EmailNotifier,
-    TelegramNotifier,
-    WhatsAppNotifier,
-    build_notifiers,
-    packet_digest,
-)
+from lead_desk.notifiers import AgentNotifier, CLINotifier, CustomerRecipientError, assert_agent_recipient, packet_digest
 from lead_desk.packet import WITHHELD, build_packet
 from lead_desk.pipeline import LeadDesk
 from lead_desk.schema import Channel, Lead, PacketStatus
@@ -29,10 +20,10 @@ from lead_desk.storage.repository import LeadRepository
 PAYLOADS = json.loads((ROOT / "lead_desk" / "data" / "synthetic_payloads.json").read_text(encoding="utf-8"))
 
 
-def make_desk(settings: Settings, notify=("cli",), out=None) -> tuple[LeadDesk, list[str]]:
+def make_desk(settings: Settings, show_json: bool = False) -> tuple[LeadDesk, list[str]]:
     lines: list[str] = []
-    printer = out or lines.append
-    return LeadDesk(settings, LeadRepository(":memory:"), build_notifiers(list(notify), settings, out=printer)), lines
+    notifier = CLINotifier(settings, out=lines.append, show_json=show_json)
+    return LeadDesk(settings, LeadRepository(":memory:"), [notifier]), lines
 
 
 def scripted(*answers):
@@ -59,8 +50,18 @@ def test_all_synthetic_payloads_expected_bands(settings):
             bands[p.lead.lead_id] = p.score.band.value
             assert p.status == PacketStatus.PENDING_REVIEW and p.guardrail.passed
             assert p.audience == "agent_only"
-    assert bands == {"lead_9001": "HOT", "lead_9002": "HOT", "lead_9003": "WARM", "lead_9004": "COLD",
-                     "lead_9005": "COLD", "lead_9006": "HOT", "lead_9007": "COLD"}
+    assert bands == {"lead_9001": "HOT", "lead_9002": "HOT", "lead_9003": "COLD", "lead_9004": "COLD",
+                     "lead_9005": "COLD", "lead_9006": "HOT", "lead_9007": "WARM"}
+
+
+def test_email_only_lead_gets_qualifying_draft_and_rental_gets_rent_matches(settings):
+    desk, _ = make_desk(settings)
+    [email_only] = ingest(desk, 2)
+    assert email_only.score.band.value == "COLD" and email_only.matches == []
+    assert "telefone" in email_only.draft_reply_for_agent
+    [rent] = ingest(desk, 6)
+    assert rent.score.band.value == "WARM"
+    assert rent.matches and all(m.listing.operation.value == "rent" for m in rent.matches)
 
 
 def test_approve_records_decision_and_sends_nothing(settings):
@@ -124,47 +125,39 @@ def test_guardrail_blocks_packet_and_approval(settings):
     assert check_fields({"draft": "Olá, obrigado"}).passed
 
 
-def test_same_packet_json_through_all_notifier_stubs_dry_run(settings):
-    desk, lines = make_desk(settings, notify=("cli", "email", "whatsapp", "telegram"))
+def test_cli_desk_is_the_only_delivery_and_prints_packet_json(settings):
+    desk, lines = make_desk(settings, show_json=True)
     [packet] = ingest(desk, 5)
-    digest = packet_digest(packet)
     notified = [e["payload"] for e in desk.repo.events("lead_9006") if e["event_type"] == "notified"]
-    assert [n["channel"] for n in notified] == ["cli", "email", "whatsapp", "telegram"]
-    assert {n["packet_sha256"] for n in notified} == {digest}
-    assert [n["dry_run"] for n in notified] == [False, True, True, True]
-    previews = [l for l in lines if l.startswith("--- [dry-run:")]
-    assert len(previews) == 3 and all(digest[:16] in p for p in previews)
-    assert "[attachment" in previews[0]
+    assert [n["channel"] for n in notified] == ["cli"]
+    assert notified[0]["packet_sha256"] == packet_digest(packet)
+    assert json.loads(lines[-1])["packet_id"] == packet.packet_id
+    assert json.loads(lines[-1])["audience"] == "agent_only"
 
 
-def test_notifiers_dry_run_when_configured_but_not_live():
-    s = Settings(telegram_bot_token="x", agent_telegram_chat_id="123", notify_live=False)
-    n = TelegramNotifier(s, out=lambda _: None)
-    assert n.configured and not n.live
+def test_notifier_interface_kept_for_future_channels(settings):
+    class FutureNotifier(AgentNotifier):
+        name = "future"
 
+        @property
+        def recipient(self):
+            return "lead_9001@example.invalid"
 
-def test_notifier_refuses_customer_as_recipient(settings):
     desk, _ = make_desk(settings)
-    [packet] = ingest(desk, 1)
-    s = Settings(agent_whatsapp_to=packet.lead.contact_handle)
-    with pytest.raises(CustomerRecipientError):
-        WhatsAppNotifier(s, out=lambda _: None).notify(packet)
     [packet] = ingest(desk, 0)
+    with pytest.raises(NotImplementedError):
+        AgentNotifier(settings).notify(packet)
     with pytest.raises(CustomerRecipientError):
-        EmailNotifier(Settings(agent_email_to="LEAD_9001@example.invalid"), out=lambda _: None).notify(packet)
+        assert_agent_recipient(FutureNotifier(settings).recipient, packet)
 
 
-def test_whatsapp_webhook_verify_signature_and_ingest():
-    s = Settings(whatsapp_verify_token="vt", whatsapp_app_secret="sec")
-    desk, _ = make_desk(s)
-    assert handle_webhook(desk, "GET", "/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=vt&hub.challenge=42", {}, b"") == (200, "42")
-    assert handle_webhook(desk, "GET", "/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=no&hub.challenge=42", {}, b"")[0] == 403
-    body = json.dumps(PAYLOADS[1]["payload"]).encode()
-    assert handle_webhook(desk, "POST", "/webhooks/whatsapp", {"X-Hub-Signature-256": "sha256=bad"}, body)[0] == 401
-    sig = "sha256=" + hmac.new(b"sec", body, hashlib.sha256).hexdigest()
-    status, resp = handle_webhook(desk, "POST", "/webhooks/whatsapp", {"X-Hub-Signature-256": sig}, body)
-    assert status == 200 and resp["packets"][0]["band"] == "HOT"
-    assert len(desk.repo.pending_packets()) == 1
+def test_no_outbound_notifier_or_whatsapp_code_paths():
+    import lead_desk.notifiers as notifiers
+
+    source = (ROOT / "lead_desk" / "notifiers.py").read_text(encoding="utf-8")
+    assert "smtplib" not in source and "urllib" not in source
+    assert not hasattr(notifiers, "EmailNotifier") and not hasattr(notifiers, "WhatsAppNotifier")
+    assert "whatsapp" not in {c.value for c in Channel}
 
 
 def test_telegram_webhook_secret_and_junk():
@@ -179,9 +172,12 @@ def test_telegram_webhook_secret_and_junk():
 
 def test_cli_demo_and_imap_poll_and_review(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr("builtins.input", scripted("a", "r", "s"))
-    assert cli.main(["demo", "--notify", "all", "--json"]) == 0
+    assert cli.main(["demo", "--json"]) == 0
     out = capsys.readouterr().out
-    assert "APPROVED by agent_demo" in out and "[dry-run:telegram]" in out and '"audience": "agent_only"' in out
+    assert "APPROVED by agent_demo" in out and '"audience": "agent_only"' in out
+    assert "Listings provider: mock" in out and "dry-run" not in out
+    with pytest.raises(SystemExit):
+        cli.main(["demo", "--notify", "all"])
     db = str(tmp_path / "desk.sqlite3")
     assert cli.main(["imap-poll", "--db", db]) == 0
     monkeypatch.setattr("builtins.input", scripted("a", "a"))
