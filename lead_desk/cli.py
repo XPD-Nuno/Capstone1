@@ -4,6 +4,7 @@
   ingest         one payload file for a given channel
   imap-poll      email intake from IMAP (or the sample .eml inbox when IMAP is not configured)
   serve-webhooks Telegram webhook stub server
+  serve-api      FastAPI backend + web dashboard (web/dist) on http://127.0.0.1:8000
   review         approve/reject pending packets stored in the database
   leads          list stored leads
 """
@@ -107,6 +108,18 @@ def cmd_leads(args: argparse.Namespace, settings: Settings) -> int:
     return 0
 
 
+def cmd_serve_api(args: argparse.Namespace, settings: Settings) -> int:
+    import uvicorn
+
+    from .api import create_app
+
+    desk = LeadDesk(settings, LeadRepository(args.db, tenant_id=settings.tenant_id), notifiers=[])
+    app = create_app(settings, desk=desk, seed_demo=args.seed_demo)
+    print(f"Lead Desk dashboard on http://{args.host}:{args.port} (API docs at /docs, db={args.db})", flush=True)
+    uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+    return 0
+
+
 def cmd_serve(args: argparse.Namespace, settings: Settings) -> int:
     from .intake.webhooks import make_server
 
@@ -156,6 +169,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8787)
     p.set_defaults(func=cmd_serve)
+
+    p = sub.add_parser("serve-api", help="FastAPI backend + web dashboard")
+    common(p, None)
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8000)
+    p.add_argument("--seed-demo", action="store_true", help="load the synthetic demo payloads on start")
+    p.set_defaults(func=cmd_serve_api)
 
     p = sub.add_parser("review", help="approve/reject pending packets")
     common(p, None)
