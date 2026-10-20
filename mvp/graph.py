@@ -91,11 +91,12 @@ def node_draft(state: GraphState) -> dict[str, Any]:
 
 def build_graph():
     graph = StateGraph(GraphState)
-    graph.add_node("score", node_score)
-    graph.add_node("draft", node_draft)
-    graph.add_edge(START, "score")
-    graph.add_edge("score", "draft")
-    graph.add_edge("draft", END)
+    # Node names must not collide with GraphState keys ("score", "draft").
+    graph.add_node("score_lead", node_score)
+    graph.add_node("write_draft", node_draft)
+    graph.add_edge(START, "score_lead")
+    graph.add_edge("score_lead", "write_draft")
+    graph.add_edge("write_draft", END)
     return graph.compile()
 
 

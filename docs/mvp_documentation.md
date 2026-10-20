@@ -2,7 +2,7 @@
 
 ## What it is
 
-A Streamlit “lead desk” with a LangGraph of two nodes (`score` → `draft`). The third step is **human**: Approve or Reject. There is no send API.
+A Streamlit “lead desk” with a LangGraph of two nodes (`score_lead` → `write_draft`). The third step is **human**: Approve or Reject. There is no send API.
 
 ```powershell
 streamlit run mvp\app.py
@@ -20,7 +20,7 @@ streamlit run mvp\app.py
 - Invalid lead payloads fail Pydantic validation before the graph runs.
 - LLM draft errors fall back to a template in Portuguese.
 - Banned-attribute flag surfaces as a blocking warning in the UI.
-- Status cannot skip to `ready` without the Approve click.
+- Status starts at `pending_approval` and only becomes `approved` (or `rejected`) by a human click.
 
 ## What “core AI capability” means here
 
