@@ -1,0 +1,161 @@
+"""SQLite repository. Plain SQL with `?` placeholders kept close to what Postgres needs."""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from ..schema import AgentPacket, Lead, LeadScore, PacketStatus
+
+SCHEMA = Path(__file__).with_name("schema_sqlite.sql")
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+class LeadRepository:
+    def __init__(self, db_path: str | Path = ":memory:", tenant_id: str = "tenant_demo"):
+        self.tenant_id = tenant_id
+        # Callers that share the repository across threads (webhook server) must serialize access.
+        self.conn = sqlite3.connect(str(db_path), check_same_thread=False)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA foreign_keys = ON")
+        self.conn.executescript(SCHEMA.read_text(encoding="utf-8"))
+        self.conn.execute(
+            "INSERT OR IGNORE INTO tenants(tenant_id, name, created_at) VALUES (?, ?, ?)",
+            (tenant_id, "Demo agency (synthetic)", _now()),
+        )
+        self.conn.commit()
+
+    def close(self) -> None:
+        self.conn.close()
+
+    # ------------------------------------------------------------ leads
+
+    def upsert_lead(self, lead: Lead) -> Lead:
+        """Dedup on (tenant, dedup_key): a repeat contact keeps its original lead_id."""
+        if lead.dedup_key:
+            row = self.conn.execute(
+                "SELECT lead_id FROM leads WHERE tenant_id = ? AND dedup_key = ?",
+                (self.tenant_id, lead.dedup_key),
+            ).fetchone()
+            if row and row["lead_id"] != lead.lead_id:
+                lead = lead.model_copy(update={"lead_id": row["lead_id"]})
+        now = _now()
+        self.conn.execute(
+            """
+            INSERT INTO leads(lead_id, tenant_id, channel, source, dedup_key, contact_handle,
+                              portal_listing_ref, city, first_seen_at, last_seen_at, lead_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(lead_id) DO UPDATE SET
+                last_seen_at = excluded.last_seen_at,
+                lead_json = excluded.lead_json,
+                city = COALESCE(excluded.city, leads.city),
+                portal_listing_ref = COALESCE(excluded.portal_listing_ref, leads.portal_listing_ref)
+            """,
+            (lead.lead_id, self.tenant_id, lead.channel.value, lead.source, lead.dedup_key,
+             lead.contact_handle, lead.portal_listing_ref, lead.city, now, now, lead.model_dump_json()),
+        )
+        self.add_event(lead.lead_id, "ingested", {"channel": lead.channel.value, "raw_ref": lead.raw_ref})
+        self.conn.commit()
+        return lead
+
+    def record_score(self, score: LeadScore) -> None:
+        self.conn.execute(
+            "UPDATE leads SET latest_band = ?, latest_score = ? WHERE lead_id = ?",
+            (score.band.value, score.score_0_100, score.lead_id),
+        )
+        self.add_event(score.lead_id, "scored", score.model_dump(mode="json"))
+        self.conn.commit()
+
+    def get_lead(self, lead_id: str) -> Lead | None:
+        row = self.conn.execute("SELECT lead_json FROM leads WHERE lead_id = ?", (lead_id,)).fetchone()
+        return Lead.model_validate_json(row["lead_json"]) if row else None
+
+    def list_leads(self, band: str | None = None) -> list[dict[str, Any]]:
+        sql = "SELECT lead_id, channel, source, city, latest_band, latest_score, last_seen_at FROM leads WHERE tenant_id = ?"
+        args: list[Any] = [self.tenant_id]
+        if band:
+            sql += " AND latest_band = ?"
+            args.append(band)
+        return [dict(r) for r in self.conn.execute(sql + " ORDER BY last_seen_at DESC", args)]
+
+    # ------------------------------------------------------------ events
+
+    def add_event(self, lead_id: str, event_type: str, payload: dict[str, Any], actor: str = "system") -> None:
+        self.conn.execute(
+            "INSERT INTO lead_events(tenant_id, lead_id, event_type, actor, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (self.tenant_id, lead_id, event_type, actor, json.dumps(payload, ensure_ascii=False, default=str), _now()),
+        )
+
+    def events(self, lead_id: str) -> list[dict[str, Any]]:
+        rows = self.conn.execute(
+            "SELECT event_type, actor, payload_json, created_at FROM lead_events WHERE lead_id = ? ORDER BY event_id",
+            (lead_id,),
+        )
+        return [dict(r) | {"payload": json.loads(r["payload_json"])} for r in rows]
+
+    # ------------------------------------------------------------ packets + HITL
+
+    def save_packet(self, packet: AgentPacket) -> None:
+        self.conn.execute(
+            """
+            INSERT INTO packets(packet_id, tenant_id, lead_id, status, packet_json, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(packet_id) DO UPDATE SET status = excluded.status, packet_json = excluded.packet_json
+            """,
+            (packet.packet_id, self.tenant_id, packet.lead.lead_id, packet.status.value,
+             packet.model_dump_json(), packet.created_at.isoformat()),
+        )
+        self.add_event(packet.lead.lead_id, "packet", {"packet_id": packet.packet_id, "status": packet.status.value,
+                                                       "listing_ids": [m.listing.listing_id for m in packet.matches]})
+        self.conn.commit()
+
+    def pending_packets(self) -> list[AgentPacket]:
+        rows = self.conn.execute(
+            "SELECT packet_json FROM packets WHERE tenant_id = ? AND status = ? ORDER BY created_at",
+            (self.tenant_id, PacketStatus.PENDING_REVIEW.value),
+        )
+        return [AgentPacket.model_validate_json(r["packet_json"]) for r in rows]
+
+    def record_decision(self, packet: AgentPacket, status: PacketStatus, agent_id: str, note: str | None = None) -> AgentPacket:
+        decided = packet.model_copy(update={"status": status, "decision_note": note})
+        self.conn.execute(
+            "UPDATE packets SET status = ?, packet_json = ?, decided_at = ?, decided_by = ? WHERE packet_id = ?",
+            (status.value, decided.model_dump_json(), _now(), agent_id, packet.packet_id),
+        )
+        self.add_event(packet.lead.lead_id, "decision",
+                       {"packet_id": packet.packet_id, "status": status.value, "note": note}, actor=f"agent:{agent_id}")
+        self.conn.commit()
+        return decided
+
+    def reject_listings(self, lead_id: str, listing_ids: list[str], agent_id: str) -> None:
+        for listing_id in listing_ids:
+            self.conn.execute(
+                "INSERT OR IGNORE INTO rejected_listings(tenant_id, lead_id, listing_id, rejected_by, created_at) VALUES (?, ?, ?, ?, ?)",
+                (self.tenant_id, lead_id, listing_id, agent_id, _now()),
+            )
+        self.add_event(lead_id, "listing_rejected", {"listing_ids": listing_ids}, actor=f"agent:{agent_id}")
+        self.conn.commit()
+
+    def rejected_listing_ids(self, lead_id: str) -> list[str]:
+        rows = self.conn.execute(
+            "SELECT listing_id FROM rejected_listings WHERE tenant_id = ? AND lead_id = ? ORDER BY listing_id",
+            (self.tenant_id, lead_id),
+        )
+        return [r["listing_id"] for r in rows]
+
+    def bump_usage(self, meter: str, quantity: int = 1) -> None:
+        period = datetime.now(timezone.utc).strftime("%Y-%m")
+        self.conn.execute(
+            """
+            INSERT INTO usage_meters(tenant_id, period, meter, quantity) VALUES (?, ?, ?, ?)
+            ON CONFLICT(tenant_id, period, meter) DO UPDATE SET quantity = usage_meters.quantity + excluded.quantity
+            """,
+            (self.tenant_id, period, meter, quantity),
+        )
+        self.conn.commit()

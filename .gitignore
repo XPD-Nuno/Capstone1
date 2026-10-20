@@ -14,4 +14,5 @@ Thumbs.db
 charts/*.html
 !charts/.gitkeep
 data/*.pkl
+*.sqlite3
 mvp/.streamlit/secrets.toml

@@ -1,0 +1,21 @@
+From: Imovirtual <no-reply@imovirtual.com>
+To: agency-inbox@example.invalid
+Subject: Pedido de contacto - T2 Paranhos
+Message-ID: <synthetic-inbox-01@example.invalid>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b1"
+
+--b1
+Content-Type: text/plain; charset=utf-8
+
+Tem um novo pedido de contacto.
+Email: lead_9101@example.invalid
+Telefone: [synthetic-redacted]
+Mensagem: Olá, quero comprar um T2 no Porto com estacionamento, até 300 mil euros. Gostava de visitar na próxima semana.
+Referência: IMO-SYN-0001
+
+--b1
+Content-Type: text/html; charset=utf-8
+
+<p>Tem um novo pedido de contacto.</p>
+--b1--
