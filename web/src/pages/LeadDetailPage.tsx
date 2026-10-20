@@ -324,7 +324,7 @@ export function LeadDetailPage() {
         </div>
 
         <aside className="space-y-6">
-          <section className="card hidden p-5 lg:sticky lg:top-24 lg:block">
+          <section className="card hidden p-5 lg:sticky lg:top-24 lg:z-10 lg:block">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Decision</h2>
             <DecisionFields agentId={agentId} setAgentId={setAgentId} note={note} setNote={setNote} disabled={!open} />
             <div className="mt-4">{actions}</div>
