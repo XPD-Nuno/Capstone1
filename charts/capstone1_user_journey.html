@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capstone1 — Who uses it & why</title>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5c6b7a;
+      --line: #d8e0e8;
+      --bg: #f3f6f9;
+      --panel: #fff;
+      --accent: #1e4d6b;
+      --hot: #c45c26;
+      --warm: #b8860b;
+      --ok: #2d6a4f;
+      --soft: #e8f0f5;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); }
+    .wrap {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 1.2rem 1.4rem 2rem;
+      max-width: 1080px;
+      margin: 0 auto;
+      line-height: 1.45;
+    }
+    .eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin: 0 0 0.3rem;
+    }
+    h1 {
+      font-size: 1.55rem;
+      margin: 0 0 0.4rem;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 48rem;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 1.1rem 0 1rem;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .tab[aria-selected="true"] {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.9rem;
+    }
+    @media (max-width: 800px) {
+      .grid-3, .grid-2, .before-after { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 0.9rem 1rem;
+    }
+    .card h2, .card h3 {
+      margin: 0 0 0.45rem;
+      color: var(--accent);
+      font-size: 0.92rem;
+    }
+    .card p, .card li { font-size: 0.86rem; margin: 0.25rem 0; }
+    .persona { border-top: 3px solid var(--accent); }
+    .persona.agent { border-top-color: var(--hot); }
+    .persona.ops { border-top-color: var(--warm); }
+    .persona.ceo { border-top-color: var(--ok); }
+    .role {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 0 0 0.2rem;
+    }
+    .name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+    }
+    .journey {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+    }
+    .jstep {
+      flex: 1 1 140px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.7rem;
+      min-width: 120px;
+    }
+    .jstep .n {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .jstep .t {
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin: 0.2rem 0;
+    }
+    .jstep .d {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .jstep.human {
+      background: var(--soft);
+      border-color: #b8cdd9;
+    }
+    .arrow {
+      align-self: center;
+      color: var(--muted);
+      font-size: 1rem;
+      padding: 0 0.1rem;
+    }
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .ba.before h3 { color: #8a3b2b; }
+    .ba.after h3 { color: var(--ok); }
+    ul.tight {
+      margin: 0.2rem 0 0;
+      padding-left: 1.05rem;
+    }
+    ul.tight li {
+      margin: 0.2rem 0;
+      font-size: 0.84rem;
+    }
+    .benefit {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .benefit:last-child { border-bottom: 0; }
+    .benefit .tag {
+      flex: 0 0 auto;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: var(--soft);
+      color: var(--accent);
+      padding: 0.2rem 0.4rem;
+      min-width: 4.2rem;
+      text-align: center;
+    }
+    .caption {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.7rem;
+    }
+    .kpi {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .demo {
+      background: var(--soft);
+      border: 1px dashed #9bb4c4;
+      padding: 0.75rem 0.9rem;
+      margin-top: 0.75rem;
+      font-size: 0.84rem;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Capstone1 · Lead desk UX</p>
+  <h1>How people use it — and what they gain</h1>
+  <p class="lede">One Streamlit path: score → explain → draft → human approve/reject. Nothing is auto-sent. Benefits land for duty agents first, then ops and Chleo.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" type="button" role="tab" aria-selected="true" data-tab="who">Who &amp; why</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-tab="journey">Daily journey</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-tab="before">Before → after</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-tab="gains">Benefits by role</button>
+  </div>
+
+  <section class="panel active" id="panel-who">
+    <div class="grid-3">
+      <div class="card persona agent">
+        <p class="role">Primary user</p>
+        <p class="name">Duty agent</p>
+        <p>Opens the lead desk when a portal/website enquiry lands. Needs speed without more admin.</p>
+        <ul class="tight">
+          <li>Paste or pick the enquiry</li>
+          <li>Read band + why + next action</li>
+          <li>Edit draft, then Approve or Reject</li>
+          <li>Sends from their own email/CRM — outside this app</li>
+        </ul>
+      </div>
+      <div class="card persona ops">
+        <p class="role">Champion</p>
+        <p class="name">Ops manager</p>
+        <p>Owns shadow mode and weekly disagreement review. Cares about logs and a simple runbook.</p>
+        <ul class="tight">
+          <li>Watches HOT agreement vs seniors</li>
+          <li>Tunes rules when agents override often</li>
+          <li>Keeps banned-attribute audits clean</li>
+        </ul>
+      </div>
+      <div class="card persona ceo">
+        <p class="role">Buyer of the pilot</p>
+        <p class="name">Chleo (CEO)</p>
+        <p>Wants transparency and ROI — not a black-box “robot agent” or a scandal.</p>
+        <ul class="tight">
+          <li>Sees inspectable HOT/WARM/COLD criteria</li>
+          <li>Pilot KPIs: speed, agreement, zero auto-send</li>
+          <li>Go / no-go after 60 days</li>
+        </ul>
+      </div>
+    </div>
+    <p class="caption">Enquirers benefit indirectly: fairer, faster first contact on HOT leads — never an automated rejection.</p>
+  </section>
+
+  <section class="panel" id="panel-journey">
+    <div class="card">
+      <h2>One enquiry, five steps</h2>
+      <div class="journey">
+        <div class="jstep">
+          <div class="n">1 · Intake</div>
+          <div class="t">Enquiry arrives</div>
+          <p class="d">Idealista, website, walk-in. Agent opens Streamlit lead desk (or CSV in pilot).</p>
+        </div>
+        <span class="arrow">→</span>
+        <div class="jstep">
+          <div class="n">2 · Score</div>
+          <div class="t">Click “Score this lead”</div>
+          <p class="d">rules-v1 (or LLM-assisted draft) returns band, score, rationale, next action.</p>
+        </div>
+        <span class="arrow">→</span>
+        <div class="jstep">
+          <div class="n">3 · Understand</div>
+          <div class="t">Read the why</div>
+          <p class="d">Only allowed signals: intent, budget, timing, views, contactability. Guardrail blocks banned language.</p>
+        </div>
+        <span class="arrow">→</span>
+        <div class="jstep">
+          <div class="n">4 · Draft</div>
+          <div class="t">Edit the reply</div>
+          <p class="d">Portuguese template or LLM draft. Agent rewrites freely — model is not the decision.</p>
+        </div>
+        <span class="arrow">→</span>
+        <div class="jstep human">
+          <div class="n">5 · HITL</div>
+          <div class="t">Approve or Reject</div>
+          <p class="d">Approve = “ready for me to send”. Reject = park without that draft. App never sends.</p>
+        </div>
+      </div>
+      <div class="demo">
+        <strong>Example:</strong> “Quero comprar T2 em Lisboa… visitar amanhã” → <span class="kpi">HOT · 92</span> → next action “call within 60 minutes” → agent approves draft → copies to email.
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-before">
+    <div class="before-after">
+      <div class="card ba before">
+        <h3>Before (today)</h3>
+        <ul class="tight">
+          <li>180 weekly enquiries; seniors drown in browsers and spam</li>
+          <li>HOT buyers wait while agents clear the queue FIFO</li>
+          <li>Shadow ChatGPT paste — no log, no policy, RGPD risk</li>
+          <li>No shared language for “why we called / didn’t”</li>
+        </ul>
+      </div>
+      <div class="card ba after">
+        <h3>After (with lead desk)</h3>
+        <ul class="tight">
+          <li>HOT surfaces first with a plain-language rationale</li>
+          <li>COLD parks in low-frequency drip — no rush call</li>
+          <li>Draft gated by Approve; zero outbound without a person</li>
+          <li>Ops can audit band, version, override — not a black box</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0.75rem">
+      <h2>What “benefit” means in the pilot</h2>
+      <div class="benefit"><span class="tag">Speed</span><div>HOT first-touch median &lt; <span class="kpi">60 min</span> in office hours</div></div>
+      <div class="benefit"><span class="tag">Trust</span><div>Senior-agent agreement on HOT ≥ <span class="kpi">90%</span> on a weekly 30-lead sample</div></div>
+      <div class="benefit"><span class="tag">Safety</span><div><span class="kpi">0</span> messages sent by the app · <span class="kpi">0</span> banned attributes in production rationales</div></div>
+      <div class="benefit"><span class="tag">Money</span><div>Illustrative: recovering <span class="kpi">1 extra instruction / quarter</span> (~€10–15k) already covers the ~€10k base pilot</div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-gains">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Duty agent gains</h2>
+        <ul class="tight">
+          <li>Knows who to call <em>now</em> vs park</li>
+          <li>Starts from a draft instead of a blank screen</li>
+          <li>Can override anytime — AI suggests, they decide</li>
+          <li>Less time explaining “why this lead” to managers</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Ops &amp; Chleo gain</h2>
+        <ul class="tight">
+          <li>Transparent bands instead of gut feel alone</li>
+          <li>Shadow mode before any process change</li>
+          <li>Lower risk than uncontrolled consumer ChatGPT</li>
+          <li>Clear kill criteria if agreement or ROI fails</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0.75rem">
+      <h2>Explicit non-benefits (honesty for Chleo)</h2>
+      <p>This app does <strong>not</strong> auto-book visits, score creditworthiness, value properties, or replace agents. Benefits are triage + inspectable assist — measured in the 60-day pilot, not promised from the synthetic chart.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll(".tab");
+    var panels = {
+      who: document.getElementById("panel-who"),
+      journey: document.getElementById("panel-journey"),
+      before: document.getElementById("panel-before"),
+      gains: document.getElementById("panel-gains")
+    };
+    tabs.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-tab");
+        tabs.forEach(function (t) {
+          t.setAttribute("aria-selected", t === btn ? "true" : "false");
+        });
+        Object.keys(panels).forEach(function (k) {
+          panels[k].classList.toggle("active", k === id);
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

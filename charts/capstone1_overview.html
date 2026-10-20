@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capstone1 — Lead desk for Chleo</title>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5c6b7a;
+      --line: #d8e0e8;
+      --bg: #f4f7fa;
+      --panel: #ffffff;
+      --hot: #c45c26;
+      --warm: #c9a227;
+      --cold: #4a6fa5;
+      --accent: #1e4d6b;
+      --ok: #2d6a4f;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); }
+    .wrap {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 1.25rem 1.5rem 2rem;
+      line-height: 1.45;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header.hero {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin: 0 0 0.35rem;
+    }
+    h1 {
+      font-size: 1.65rem;
+      margin: 0 0 0.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      margin: 0;
+      color: var(--muted);
+      max-width: 52rem;
+      font-size: 0.98rem;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 1.1rem 0 1rem;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .tab[aria-selected="true"] {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 720px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 1rem 1.1rem;
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      margin: 0 0 0.55rem;
+      color: var(--accent);
+    }
+    .card p, .card li { font-size: 0.88rem; color: var(--ink); }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 0.75rem 0.85rem;
+    }
+    .stat .label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .stat .value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 0.15rem;
+    }
+    .stat .hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.75rem 0 0;
+    }
+    .step {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.45rem 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .step.hitl { background: var(--ok); }
+    .arrow { color: var(--muted); font-size: 0.9rem; }
+    .bars { margin-top: 0.5rem; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr 2.5rem;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.35rem 0;
+      font-size: 0.82rem;
+    }
+    .track {
+      height: 14px;
+      background: #e8eef3;
+      position: relative;
+    }
+    .fill { height: 100%; }
+    .fill.hot { background: var(--hot); }
+    .fill.warm { background: var(--warm); }
+    .fill.cold { background: var(--cold); }
+    .fill.buy { background: var(--accent); }
+    .fill.sell { background: #3d7a5f; }
+    .fill.rent { background: #6b5b8a; }
+    .fill.unk { background: #8a9199; }
+    .caption {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.65rem;
+    }
+    table.simple {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    table.simple th, table.simple td {
+      text-align: left;
+      padding: 0.4rem 0.35rem;
+      border-bottom: 1px solid var(--line);
+    }
+    table.simple th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.12rem 0.4rem;
+      border-radius: 2px;
+      color: #fff;
+    }
+    .pill.hot { background: var(--hot); }
+    .pill.warm { background: var(--warm); color: #222; }
+    .pill.cold { background: var(--cold); }
+    ul.tight { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+    ul.tight li { margin: 0.25rem 0; }
+    .guard {
+      border-left: 3px solid var(--ok);
+      padding-left: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .money { font-variant-numeric: tabular-nums; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Ironhack Capstone · Portuguese SME estate agency</p>
+    <h1>Capstone1 — Inspectable lead desk for Chleo</h1>
+    <p class="lede">Score and prioritise buyer/seller enquiries so agents spend time on high-conversion leads. The AI never sends or rejects alone — a human always decides.</p>
+  </header>
+
+  <div class="stat-row">
+    <div class="stat"><div class="label">Synthetic book</div><div class="value">180</div><div class="hint">Weekly enquiries scenario</div></div>
+    <div class="stat"><div class="label">HOT / WARM / COLD</div><div class="value">49 · 45 · 86</div><div class="hint">rules-v1 on synthetic CSV</div></div>
+    <div class="stat"><div class="label">Delay gap (illustrative)</div><div class="value money">€70k</div><div class="hint">Fast vs slow first-touch commission</div></div>
+    <div class="stat"><div class="label">60-day pilot (base)</div><div class="value money">€10k</div><div class="hint">One-off · ~€500/mo run</div></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" type="button" role="tab" aria-selected="true" data-tab="story">Problem &amp; path</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-tab="mix">Lead mix</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-tab="pilot">Pilot &amp; cost</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-tab="guard">Guardrails</button>
+  </div>
+
+  <section class="panel active" id="panel-story">
+    <div class="grid-2">
+      <div class="card">
+        <h2>The constraint</h2>
+        <p>Duty agents cannot give every Idealista/website enquiry the same speed. HOT buyers and motivated sellers wait behind browsers and spam. Consumer ChatGPT is already in the shadows — uncontrolled and unlogged.</p>
+        <p style="margin-top:0.65rem"><strong>Capacity sketch:</strong> 180 weekly enquiries vs 8 agents × 6 quality conversations × 5 days. Buying more portal credits without triage burns seniors.</p>
+      </div>
+      <div class="card">
+        <h2>One inspectable path</h2>
+        <div class="flow">
+          <span class="step">1 · Score</span><span class="arrow">→</span>
+          <span class="step">2 · Explain</span><span class="arrow">→</span>
+          <span class="step">3 · Draft</span><span class="arrow">→</span>
+          <span class="step hitl">4 · Approve / reject</span>
+        </div>
+        <p style="margin-top:0.75rem">Shared engine: <code>src/scoring_engine.py</code> (Pydantic + deterministic rules). POC: n8n. MVP: LangGraph + Streamlit HITL. Nothing auto-sends.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <h2>Stack map</h2>
+      <table class="simple">
+        <thead><tr><th>Layer</th><th>Artefact</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Rules</td><td>scoring_engine.py</td><td>HOT/WARM/COLD + rationale + next action</td></tr>
+          <tr><td>POC</td><td>n8n/workflow.json</td><td>Importable webhook path, same policy as prompt</td></tr>
+          <tr><td>MVP</td><td>mvp/graph.py + app.py</td><td>score → draft → pending approval in UI</td></tr>
+          <tr><td>Pitch</td><td>charts/*.png</td><td>6 CEO-language charts (INE + synthetic)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-mix">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Band mix after rules-v1 (n=180)</h2>
+        <div class="bars">
+          <div class="bar-row"><span class="pill hot">HOT</span><div class="track"><div class="fill hot" style="width:27.2%"></div></div><span>49</span></div>
+          <div class="bar-row"><span class="pill warm">WARM</span><div class="track"><div class="fill warm" style="width:25%"></div></div><span>45</span></div>
+          <div class="bar-row"><span class="pill cold">COLD</span><div class="track"><div class="fill cold" style="width:47.8%"></div></div><span>86</span></div>
+        </div>
+        <p class="caption">Source: data/synthetic_leads.csv scored by rules-v1 · scenario, not audited CRM books</p>
+      </div>
+      <div class="card">
+        <h2>Intent mix</h2>
+        <div class="bars">
+          <div class="bar-row"><span>buy</span><div class="track"><div class="fill buy" style="width:30.6%"></div></div><span>55</span></div>
+          <div class="bar-row"><span>sell</span><div class="track"><div class="fill sell" style="width:10.6%"></div></div><span>19</span></div>
+          <div class="bar-row"><span>rent</span><div class="track"><div class="fill rent" style="width:16.1%"></div></div><span>29</span></div>
+          <div class="bar-row"><span>unknown</span><div class="track"><div class="fill unk" style="width:42.8%"></div></div><span>77</span></div>
+        </div>
+        <p class="caption">Rent + unclear intent clog a sales-led SME — triage decides who gets a senior call.</p>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:1rem">
+      <div class="card">
+        <h2>Geography (top cities)</h2>
+        <table class="simple">
+          <thead><tr><th>City</th><th>Leads</th></tr></thead>
+          <tbody>
+            <tr><td>Lisboa</td><td>43</td></tr>
+            <tr><td>Vila Nova de Gaia</td><td>23</td></tr>
+            <tr><td>Cascais</td><td>20</td></tr>
+            <tr><td>Porto</td><td>18</td></tr>
+            <tr><td>Braga</td><td>16</td></tr>
+            <tr><td>Setúbal</td><td>15</td></tr>
+          </tbody>
+        </table>
+        <p class="caption">City is display-only — never a penalty or “quality of person” proxy.</p>
+      </div>
+      <div class="card">
+        <h2>Illustrative delay cost</h2>
+        <table class="simple">
+          <thead><tr><th>Touch speed</th><th>Expected commission</th></tr></thead>
+          <tbody>
+            <tr><td>Fast (&lt;1h on HOT/WARM priority)</td><td class="money">€148,560</td></tr>
+            <tr><td>Slow (&gt;8h)</td><td class="money">€78,960</td></tr>
+            <tr><td><strong>Gap</strong></td><td class="money">€69,600</td></tr>
+          </tbody>
+        </table>
+        <p class="caption">Assumptions in charts docs (€12k deal commission; conversion drops if slow). Direction for the pilot ask — replace with Chleo’s CRM.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-pilot">
+    <div class="grid-2">
+      <div class="card">
+        <h2>60-day commercial pilot</h2>
+        <table class="simple">
+          <thead><tr><th>Window</th><th>Exit</th></tr></thead>
+          <tbody>
+            <tr><td>Days 0–14</td><td>Score a CSV without us in the room</td></tr>
+            <tr><td>Days 15–45</td><td>Shadow mode; weekly disagreement review</td></tr>
+            <tr><td>Days 46–60</td><td>HOT on duty dashboard; go / no-go</td></tr>
+          </tbody>
+        </table>
+        <ul class="tight">
+          <li>Senior-agent HOT agreement ≥ 90% on weekly 30-lead sample</li>
+          <li>HOT first-touch median &lt; 60 minutes (office hours)</li>
+          <li>0 outbound without human approval</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Cost sketch (EUR, planning)</h2>
+        <table class="simple">
+          <thead><tr><th>Item</th><th>Base</th></tr></thead>
+          <tbody>
+            <tr><td>One-off pilot total</td><td class="money">€10,000</td></tr>
+            <tr><td>Range</td><td>€5.3k – €17.2k</td></tr>
+            <tr><td>Monthly run (~800 scores)</td><td>~€450–550</td></tr>
+            <tr><td>LLM tokens (mini)</td><td>~€15–40 / mo</td></tr>
+          </tbody>
+        </table>
+        <p class="caption">One extra completed instruction per quarter at €10–15k commission covers the base pilot — measure, don’t believe the synthetic chart alone.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-guard">
+    <div class="card">
+      <h2>Hard product rules</h2>
+      <div class="guard">
+        <ul class="tight">
+          <li>Synthetic <code>lead_*</code> IDs only — no invented live client PII</li>
+          <li>Draft + HITL only — no Gmail/Twilio auto-send</li>
+          <li>No nationality, neighbourhood, or language ability as creditworthiness proxies</li>
+          <li>GDPR / EU AI Act docs are a consultant first-pass — not certification</li>
+          <li>Round 1: no LangSmith project in the submission pack</li>
+          <li>Banned rationale terms audited (nationality, race, gender, religion, …)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <h2>Eval mini-set (paper)</h2>
+      <p>7 golden cases in <code>evaluation/scored_cases.csv</code> — intent, band, and banned-attribute checks all pass under rules-v1. Example: <span class="pill hot">HOT</span> buy Lisboa score 92 → call within 60 minutes.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll(".tab");
+    var panels = {
+      story: document.getElementById("panel-story"),
+      mix: document.getElementById("panel-mix"),
+      pilot: document.getElementById("panel-pilot"),
+      guard: document.getElementById("panel-guard")
+    };
+    tabs.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-tab");
+        tabs.forEach(function (t) { t.setAttribute("aria-selected", t === btn ? "true" : "false"); });
+        Object.keys(panels).forEach(function (k) {
+          panels[k].classList.toggle("active", k === id);
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

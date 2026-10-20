@@ -22,6 +22,7 @@ python charts\generate_charts.py
 | `04_geography.png` | Demand is lumpy | Leads by city | One national playbook is wrong; Lisboa/Porto dominate | Synthetic, weighted toward INE-hot geographies |
 | `05_delay_cost.png` | Slow follow-up is a revenue leak | Illustrative expected commission, fast vs slow touch | CEO language for the 60-day pilot ask | Assumptions below — **not** measured on live deals |
 | `06_opportunity_risk.png` | Where to start | Opportunity vs governance risk | Why we POC scoring, not an AVM | Consultant scores in `research/opportunities_risks.md` |
+| `capstone1_product_workflow.html` | Full product day-flow beyond Round 1 MVP | Interactive viz: Capture → Store → Score → Match → Draft → HITL → Audit/Quota + 7 topic tabs (intake, repo, bands, filters, tool ladder, HITL, cost/admin) | Pitch-ready story for channel priority, lasting lead memory, complete HOT/WARM/COLD + gaps, property match, scrape/API ladder, prepaid quotas — still draft+HITL only | Product blueprint (`docs/product_architecture_v2.md`); complements overview + user-journey HTML |
 
 ## Assumptions (must stay visible)
 

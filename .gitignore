@@ -12,6 +12,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 charts/*.html
+!charts/capstone1_*.html
 !charts/.gitkeep
 data/*.pkl
 mvp/.streamlit/secrets.toml

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capstone1 — Product workflow (day in the life)</title>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5c6b7a;
+      --line: #d8e0e8;
+      --bg: #f4f7fa;
+      --panel: #ffffff;
+      --hot: #c45c26;
+      --warm: #c9a227;
+      --cold: #4a6fa5;
+      --accent: #1e4d6b;
+      --ok: #2d6a4f;
+      --soft: #e8f0f5;
+      --warn: #8a3b2b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); }
+    .wrap {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 1.25rem 1.5rem 2rem;
+      line-height: 1.45;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    header.hero {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 1rem;
+      margin-bottom: 1.1rem;
+    }
+    .eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin: 0 0 0.35rem;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 0.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      margin: 0;
+      color: var(--muted);
+      max-width: 54rem;
+      font-size: 0.96rem;
+    }
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.55rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .benefit-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--accent);
+      padding: 0.65rem 0.75rem;
+    }
+    .benefit-card .tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.25rem;
+    }
+    .benefit-card p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--ink);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .benefits { grid-template-columns: 1fr 1fr; }
+      .vflow { flex-direction: row; flex-wrap: wrap; }
+      .vflow .vline { display: none; }
+    }
+    .vflow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 0.85rem 0.75rem;
+      position: sticky;
+      top: 0.5rem;
+    }
+    .vflow h2 {
+      font-size: 0.78rem;
+      margin: 0 0 0.65rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .vstep {
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+      cursor: pointer;
+      border: 1px solid transparent;
+      padding: 0.4rem 0.35rem;
+      border-radius: 2px;
+      text-align: left;
+      background: transparent;
+      width: 100%;
+      font-family: inherit;
+      color: inherit;
+    }
+    .vstep:hover { background: var(--soft); }
+    .vstep[aria-current="true"] {
+      background: var(--soft);
+      border-color: #b8cdd9;
+    }
+    .vstep .num {
+      flex: 0 0 1.5rem;
+      height: 1.5rem;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vstep.hitl .num { background: var(--ok); }
+    .vstep .label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .vstep .hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0.1rem 0 0;
+    }
+    .vline {
+      width: 2px;
+      height: 0.55rem;
+      background: var(--line);
+      margin: 0.05rem 0 0.05rem 0.95rem;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 0 0 0.85rem;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      padding: 0.4rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .tab[aria-selected="true"] {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 1rem 1.1rem;
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      margin: 0 0 0.55rem;
+      color: var(--accent);
+    }
+    .card h3 {
+      font-size: 0.86rem;
+      margin: 0.85rem 0 0.4rem;
+      color: var(--ink);
+    }
+    .card p, .card li { font-size: 0.86rem; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+    @media (max-width: 720px) {
+      .grid-2, .benefits { grid-template-columns: 1fr; }
+    }
+    table.simple {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    table.simple th, table.simple td {
+      text-align: left;
+      padding: 0.4rem 0.35rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.simple th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.12rem 0.4rem;
+      border-radius: 2px;
+      color: #fff;
+    }
+    .pill.hot { background: var(--hot); }
+    .pill.warm { background: var(--warm); color: #222; }
+    .pill.cold { background: var(--cold); }
+    .pill.prio {
+      background: var(--soft);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    ul.tight { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+    ul.tight li { margin: 0.22rem 0; }
+    .guard {
+      border-left: 3px solid var(--ok);
+      padding-left: 0.75rem;
+      margin-top: 0.65rem;
+    }
+    .warn-box {
+      border-left: 3px solid var(--warn);
+      padding-left: 0.75rem;
+      margin-top: 0.65rem;
+      font-size: 0.84rem;
+    }
+    .caption {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.65rem;
+    }
+    .callout {
+      background: var(--soft);
+      border: 1px dashed #9bb4c4;
+      padding: 0.7rem 0.85rem;
+      margin-top: 0.75rem;
+      font-size: 0.84rem;
+    }
+    .callout strong { color: var(--accent); }
+    .ladder {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+    }
+    .rung {
+      display: grid;
+      grid-template-columns: 2.2rem 1fr;
+      gap: 0.5rem;
+      align-items: start;
+      padding: 0.45rem 0.5rem;
+      border: 1px solid var(--line);
+      background: #fafcfd;
+    }
+    .rung .rank {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      text-align: center;
+      padding: 0.2rem 0;
+    }
+    .rung.later .rank { background: var(--muted); }
+    .rung .title { font-size: 0.84rem; font-weight: 600; margin: 0; }
+    .rung .desc { font-size: 0.76rem; color: var(--muted); margin: 0.15rem 0 0; }
+    .quota-bar {
+      height: 12px;
+      background: #e8eef3;
+      margin: 0.35rem 0 0.15rem;
+      position: relative;
+    }
+    .quota-bar .fill { height: 100%; background: var(--accent); }
+    .quota-bar .fill.warn { background: var(--warm); }
+    .quota-bar .fill.stop { background: var(--hot); }
+    .schema {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.78rem;
+      background: #f0f4f7;
+      padding: 0.65rem 0.75rem;
+      margin: 0.4rem 0 0;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Capstone1 · Product architecture · Pitch viz</p>
+    <h1>Day in the life — Capture → Audit</h1>
+    <p class="lede">Differentiated lead desk for individual agents: transparent bands, lasting lead memory, assistive property match, and prepaid LLM quotas. Drafts only — the agent always sends. Compete on inspectability and spend control, not on auto-WhatsApp like portal CRMs.</p>
+  </header>
+
+  <div class="benefits" aria-label="User benefits">
+    <div class="benefit-card">
+      <p class="tag">Speed</p>
+      <p>HOT leads surface first with a plain-language why — call before the queue dies.</p>
+    </div>
+    <div class="benefit-card">
+      <p class="tag">Memory</p>
+      <p>Reopen any past lead: band, source, draft status — not trapped in inboxes.</p>
+    </div>
+    <div class="benefit-card">
+      <p class="tag">Inspectable</p>
+      <p>Rules-first <span class="pill hot">HOT</span> <span class="pill warm">WARM</span> <span class="pill cold">COLD</span> — override anytime; no black box.</p>
+    </div>
+    <div class="benefit-card">
+      <p class="tag">Spend control</p>
+      <p>Rules scoring is free; LLM drafts meter against prepaid credits with soft/hard stops.</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="vflow" aria-label="Vertical workflow">
+      <h2>Day flow</h2>
+      <button type="button" class="vstep" data-tab="intake" aria-current="true">
+        <span class="num">1</span>
+        <span><p class="label">Capture</p><p class="hint">Channel intake</p></span>
+      </button>
+      <div class="vline"></div>
+      <button type="button" class="vstep" data-tab="repo" aria-current="false">
+        <span class="num">2</span>
+        <span><p class="label">Store</p><p class="hint">Lead repository</p></span>
+      </button>
+      <div class="vline"></div>
+      <button type="button" class="vstep" data-tab="score" aria-current="false">
+        <span class="num">3</span>
+        <span><p class="label">Score</p><p class="hint">HOT / WARM / COLD</p></span>
+      </button>
+      <div class="vline"></div>
+      <button type="button" class="vstep" data-tab="match" aria-current="false">
+        <span class="num">4</span>
+        <span><p class="label">Match</p><p class="hint">Property filters</p></span>
+      </button>
+      <div class="vline"></div>
+      <button type="button" class="vstep" data-tab="tools" aria-current="false">
+        <span class="num">5</span>
+        <span><p class="label">Fetch</p><p class="hint">API / scrape ladder</p></span>
+      </button>
+      <div class="vline"></div>
+      <button type="button" class="vstep hitl" data-tab="hitl" aria-current="false">
+        <span class="num">6</span>
+        <span><p class="label">Draft → HITL</p><p class="hint">Approve / reject</p></span>
+      </button>
+      <div class="vline"></div>
+      <button type="button" class="vstep" data-tab="admin" aria-current="false">
+        <span class="num">7</span>
+        <span><p class="label">Audit / Quota</p><p class="hint">Cost &amp; admin</p></span>
+      </button>
+    </aside>
+
+    <div class="main">
+      <div class="tabs" role="tablist">
+        <button class="tab" type="button" role="tab" aria-selected="true" data-tab="intake">1 · Intake</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="repo">2 · Repository</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="score">3 · Bands</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="match">4 · Filters</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="tools">5 · Tools</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="hitl">6 · HITL</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="admin">7 · Cost &amp; admin</button>
+      </div>
+
+      <!-- 1 Intake -->
+      <section class="panel active" id="panel-intake">
+        <div class="card">
+          <h2>Channel intake priority</h2>
+          <p>How leads reach the desk for Portuguese SME agents — preferred order, not “build every channel on day one.”</p>
+          <table class="simple">
+            <thead><tr><th>Priority</th><th>Channel</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td><span class="pill prio">1</span></td><td><strong>Email / portal notification parse</strong></td><td>Idealista/Imovirtual often deliver enquiries as email; reliable without partner API</td></tr>
+              <tr><td><span class="pill prio">2</span></td><td><strong>Official portal lead API / webhook</strong></td><td>Structured JSON when Idealista partner plans exist; less brittle than scraping</td></tr>
+              <tr><td><span class="pill prio">3</span></td><td><strong>WhatsApp Business Cloud API</strong></td><td>Dominant for PT agent <em>outbound</em> follow-up; inbound if they publish a business number</td></tr>
+              <tr><td><span class="pill prio">4</span></td><td><strong>Website form / Meta lead ads</strong></td><td>Common SME sources via webhook</td></tr>
+              <tr><td><span class="pill prio">↓</span></td><td>Telegram</td><td>Deprioritize — weak in PT residential day-to-day</td></tr>
+            </tbody>
+          </table>
+          <div class="guard">
+            <strong>Hard rule:</strong> app drafts only. Agent sends from their own WhatsApp / email / CRM. Do <em>not</em> auto-reply like Idealista’s AI WhatsApp qualifier.
+          </div>
+          <div class="callout"><strong>User benefit:</strong> Leads stop living only in scattered inboxes — capture feeds one desk without forcing a portal CRM lock-in.</div>
+        </div>
+      </section>
+
+      <!-- 2 Repository -->
+      <section class="panel" id="panel-repo">
+        <div class="card">
+          <h2>Lead repository (tenant-scoped)</h2>
+          <p>Not <code>session_state</code>. Agents reopen any of N past leads with band, source, last action, and draft status.</p>
+          <div class="grid-2">
+            <div>
+              <h3>Storage path</h3>
+              <ul class="tight">
+                <li><strong>Capstone demo:</strong> SQLite</li>
+                <li><strong>SaaS:</strong> Postgres</li>
+                <li>Dedup: phone/email + portal listing ref when present</li>
+              </ul>
+              <h3>Agent UI</h3>
+              <ul class="tight">
+                <li>List / filter / open any past lead</li>
+                <li>Show band, source, last action, draft</li>
+                <li>Synthetic <code>lead_*</code> IDs in demos — no invented live PII</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Core tables</h3>
+              <pre class="schema">tenants
+users
+leads
+lead_events   ← score versions, overrides, draft status
+usage_meters</pre>
+            </div>
+          </div>
+          <div class="callout"><strong>User benefit:</strong> Memory of the book — “what happened to that Cascais buyer last Tuesday?” without digging email threads.</div>
+        </div>
+      </section>
+
+      <!-- 3 Scoring -->
+      <section class="panel" id="panel-score">
+        <div class="card">
+          <h2>HOT / WARM / COLD — rules-v1 + planned gaps</h2>
+          <p>Already in <code>src/scoring_engine.py</code> (deterministic; zero LLM cost for the band).</p>
+          <table class="simple">
+            <thead><tr><th>Signal</th><th>Points / rule</th></tr></thead>
+            <tbody>
+              <tr><td>Intent buy/sell</td><td>+25 · rent +8 (rent forced <span class="pill cold">COLD</span> for sales-led SME)</td></tr>
+              <tr><td>Budget stated</td><td>+15 · sellers +12 without purchase budget</td></tr>
+              <tr><td>Timeline</td><td>≤90d +20 · ≤365d +10 · else +2</td></tr>
+              <tr><td>Activity</td><td>views ≥8 or saves ≥3 → +12 · views ≥3 → +6</td></tr>
+              <tr><td>Contactability</td><td>phone or replied → +10</td></tr>
+              <tr><td>Penalties</td><td>browsing phrases −20 · spam −40</td></tr>
+              <tr><td>Bands</td><td><span class="pill hot">HOT</span> ≥70 and buy/sell · <span class="pill cold">COLD</span> spam or &lt;35 · else <span class="pill warm">WARM</span></td></tr>
+            </tbody>
+          </table>
+          <h3>Optional operational signals (never demographic proxies)</h3>
+          <ul class="tight">
+            <li>Financing readiness (pre-approved / cash / unknown)</li>
+            <li>Typology fit (T1/T2/…) and max price vs budget consistency</li>
+            <li>Listing reference attached (portal enquiry on a specific ad)</li>
+            <li>Repeat contact / SLA breach (second touch without reply)</li>
+            <li>Source quality weight (referral &gt; cold Instagram DM) — logistics only, documented</li>
+          </ul>
+          <div class="warn-box">
+            <strong>Banned:</strong> nationality, neighbourhood-as-person-quality, language ability as creditworthiness or “quality of person.” City is display-only.
+          </div>
+          <div class="callout"><strong>User benefit:</strong> Agents and Chleo share one inspectable language for “why call now” — senior agreement measurable in the pilot.</div>
+        </div>
+      </section>
+
+      <!-- 4 Match filters -->
+      <section class="panel" id="panel-match">
+        <div class="card">
+          <h2>Property search filters (assistive match)</h2>
+          <p><strong>Today: none.</strong> After a scored buyer lead, suggest listings with Idealista-class filters — matching ads, not scoring people.</p>
+          <div class="grid-2">
+            <div>
+              <ul class="tight">
+                <li>Operation: buy / rent</li>
+                <li>Geo: district, concelho, freguesia / radius</li>
+                <li>Typology T0–T5+, rooms, useful m² range</li>
+                <li>Price min/max, condo fee max</li>
+              </ul>
+            </div>
+            <div>
+              <ul class="tight">
+                <li>Condition: new / used / needs work</li>
+                <li>Energy class</li>
+                <li>Amenities: parking, elevator, outdoor</li>
+                <li>Exclude already-rejected listing IDs</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guard">
+            Filters are for <strong>assistive matching</strong> only — never a proxy for creditworthiness or “quality of person.”
+          </div>
+          <div class="callout"><strong>User benefit:</strong> “Call this <span class="pill hot">HOT</span> lead with 3 relevant ads” — less blank-screen prep before the first touch.</div>
+        </div>
+      </section>
+
+      <!-- 5 Tools ladder -->
+      <section class="panel" id="panel-tools">
+        <div class="card">
+          <h2>Property data — preferred tool ladder</h2>
+          <p>Prefer partner APIs. Public-page extract is a commercial Phase 3 with ToS/legal review — not Round 1/2. Scraping portal <em>inboxes</em> stays out of Capstone scope.</p>
+          <div class="ladder">
+            <div class="rung">
+              <span class="rank">1</span>
+              <div><p class="title">Idealista Search / partner APIs</p><p class="desc">Structured, compliant when available</p></div>
+            </div>
+            <div class="rung">
+              <span class="rank">2</span>
+              <div><p class="title">Imovirtual / Casa Sapo partner feeds</p><p class="desc">Regional coverage for PT residential</p></div>
+            </div>
+            <div class="rung">
+              <span class="rank">3</span>
+              <div><p class="title">Agent’s own MLS / CRM export</p><p class="desc">First-party inventory the agency already owns</p></div>
+            </div>
+            <div class="rung later">
+              <span class="rank">4</span>
+              <div><p class="title">Public-page extract (legal review first)</p><p class="desc">Only then — never Capstone Round 1 claim</p></div>
+            </div>
+          </div>
+          <h3>Free / GitHub-friendly tooling (if extract is ever approved)</h3>
+          <table class="simple">
+            <thead><tr><th>Tool</th><th>License</th><th>Fit</th></tr></thead>
+            <tbody>
+              <tr><td>Crawl4AI</td><td>Apache-2.0</td><td>Best free Firecrawl-like Python markdown/JSON</td></tr>
+              <tr><td>Firecrawl</td><td>AGPL self-host + cloud</td><td>Strong hosted; self-host lacks full anti-bot</td></tr>
+              <tr><td>Scrapy</td><td>BSD</td><td>High-volume static HTML pipelines</td></tr>
+              <tr><td>Playwright</td><td>Apache-2.0</td><td>JS-heavy portal pages</td></tr>
+              <tr><td>Crawlee</td><td>Apache-2.0</td><td>TS/Python crawlers + proxies</td></tr>
+              <tr><td>ScrapeGraphAI</td><td>MIT</td><td>LLM-guided field extract</td></tr>
+            </tbody>
+          </table>
+          <div class="callout"><strong>User benefit:</strong> Clear data path that protects the agency legally while still enabling “3 relevant ads” when partner access exists.</div>
+        </div>
+      </section>
+
+      <!-- 6 HITL / Draft -->
+      <section class="panel" id="panel-hitl">
+        <div class="card">
+          <h2>Draft → human in the loop</h2>
+          <p>Capstone MVP path stays one lane: <strong>score → explain → draft → approve/reject</strong>.</p>
+          <div class="grid-2">
+            <div>
+              <h3>What the app does</h3>
+              <ul class="tight">
+                <li>Rules score + rationale (inspectable)</li>
+                <li>Optional LLM draft when credits remain</li>
+                <li>Agent edits freely</li>
+                <li>Approve = “ready for me to send”</li>
+                <li>Reject = park without that draft</li>
+              </ul>
+            </div>
+            <div>
+              <h3>What the app never does</h3>
+              <ul class="tight">
+                <li>No Gmail / Twilio / WhatsApp auto-send</li>
+                <li>No auto-booking of visits</li>
+                <li>COLD = park, never “reject housing”</li>
+                <li>No Idealista-style auto-qualifier bot</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guard">
+            Sending stays on the licensed agent’s own channel. This is the product wedge vs portal AI that messages consumers for you.
+          </div>
+          <div class="callout"><strong>User benefit:</strong> Speed of a draft without surrendering the licence, the tone, or the RGPD accountability of the first touch.</div>
+        </div>
+      </section>
+
+      <!-- 7 Admin / cost -->
+      <section class="panel" id="panel-admin">
+        <div class="card">
+          <h2>API cost control + central admin</h2>
+          <p>Sell to <strong>individual agents</strong>; platform admin meters everything through a gateway.</p>
+          <div class="grid-2">
+            <div>
+              <h3>Metering model</h3>
+              <ul class="tight">
+                <li>Rules-first scoring = <strong>zero LLM</strong></li>
+                <li>LLM only for draft/explanation when credits remain</li>
+                <li>Per-tenant caps: <code>scores</code>, <code>llm_tokens</code>, <code>listing_fetches</code></li>
+                <li>Soft stop at 80% · hard stop at 100%</li>
+                <li>Cache identical lead payloads · default mini model</li>
+              </ul>
+              <p style="margin-top:0.65rem;font-size:0.82rem;color:var(--muted)">Illustrative monthly quota use</p>
+              <div class="quota-bar"><div class="fill" style="width:55%"></div></div>
+              <p class="caption" style="margin:0">55% — healthy</p>
+              <div class="quota-bar"><div class="fill warn" style="width:82%"></div></div>
+              <p class="caption" style="margin:0">82% — soft stop / warn</p>
+              <div class="quota-bar"><div class="fill stop" style="width:100%"></div></div>
+              <p class="caption" style="margin:0">100% — hard stop on billed calls</p>
+            </div>
+            <div>
+              <h3>Central controls</h3>
+              <ul class="tight">
+                <li>One org API key + per-user login</li>
+                <li>Admin can disable user or whole tenant</li>
+                <li>Rotate keys · suspend / throttle</li>
+                <li>Usage dashboard: cost per lead, cost per approved draft</li>
+              </ul>
+              <h3>Flow (sketch)</h3>
+              <pre class="schema">Agent app → API gateway
+           → Tenant quotas
+              → Rules scorer (free)
+              → LLM drafts (billed)
+              → Listing fetch budget
+Gateway ←→ Central admin
+           (suspend · keys · meters)</pre>
+            </div>
+          </div>
+          <div class="callout"><strong>User benefit:</strong> Predictable prepaid spend for the agent; kill-switch and audit trail for the platform operator — SaaS-ready without surprise API bills.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <p class="caption">Pitch viz for product blueprint v2 · Complements <code>capstone1_overview.html</code> (problem/POC) and <code>capstone1_user_journey.html</code> (personas). Round 1 MVP still: score → explain → draft → HITL only. Portal APIs, scrape, and multi-tenant gateway are phased — not claimed as built.</p>
+</div>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll(".tab");
+    var vsteps = document.querySelectorAll(".vstep");
+    var panels = {
+      intake: document.getElementById("panel-intake"),
+      repo: document.getElementById("panel-repo"),
+      score: document.getElementById("panel-score"),
+      match: document.getElementById("panel-match"),
+      tools: document.getElementById("panel-tools"),
+      hitl: document.getElementById("panel-hitl"),
+      admin: document.getElementById("panel-admin")
+    };
+
+    function select(id) {
+      tabs.forEach(function (t) {
+        t.setAttribute("aria-selected", t.getAttribute("data-tab") === id ? "true" : "false");
+      });
+      vsteps.forEach(function (s) {
+        s.setAttribute("aria-current", s.getAttribute("data-tab") === id ? "true" : "false");
+      });
+      Object.keys(panels).forEach(function (k) {
+        panels[k].classList.toggle("active", k === id);
+      });
+    }
+
+    tabs.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        select(btn.getAttribute("data-tab"));
+      });
+    });
+    vsteps.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        select(btn.getAttribute("data-tab"));
+      });
+    });
+  })();
+</script>
+</body>
+</html>
