@@ -10,7 +10,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from mvp.graph import LEAD_GRAPH
+from mvp.graph import LEAD_GRAPH, apply_decision
 
 st.set_page_config(page_title="Chleo Lead Desk", layout="wide")
 st.title("Lead desk — score, then a human decides")
@@ -60,6 +60,15 @@ if run:
     }
     result = LEAD_GRAPH.invoke({"lead": lead})
     st.session_state["result"] = result
+    st.session_state["draft_box"] = result.get("draft", "")
+
+
+def _decide(status: str) -> None:
+    # Runs before the rerun renders, so the status line below is never stale.
+    st.session_state["result"] = apply_decision(
+        st.session_state["result"], status, st.session_state.get("draft_box", "")
+    )
+
 
 result = st.session_state.get("result")
 
@@ -75,16 +84,15 @@ with col_out:
         st.write("**Suggested next action:**", score["next_action"])
         if score.get("used_banned_attribute"):
             st.error("Guardrail: banned attribute detected in rationale. Do not use this output.")
-        st.text_area("Draft for the agent to edit", result.get("draft", ""), height=180, key="draft_box")
-        st.write("Workflow status:", result.get("status", "pending_approval"))
+        st.text_area("Draft for the agent to edit", height=180, key="draft_box")
         c1, c2 = st.columns(2)
-        if c1.button("Approve — ready for the agent to send"):
-            result["status"] = "approved"
-            st.session_state["result"] = result
-            st.success("Marked approved. Still not sent. Copy out of this screen if needed.")
-        if c2.button("Reject — do not use this draft"):
-            result["status"] = "rejected"
-            st.session_state["result"] = result
+        c1.button("Approve — ready for the agent to send", on_click=_decide, args=("approved",))
+        c2.button("Reject — do not use this draft", on_click=_decide, args=("rejected",))
+        status = result.get("status", "pending_approval")
+        st.write("Workflow status:", status)
+        if status == "approved":
+            st.success("Marked approved with the draft as edited above. Still not sent. Copy out of this screen if needed.")
+        elif status == "rejected":
             st.warning("Rejected. Lead stays in the human queue without this draft.")
 
 st.divider()

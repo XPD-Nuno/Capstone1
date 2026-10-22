@@ -89,6 +89,15 @@ def node_draft(state: GraphState) -> dict[str, Any]:
     return {"draft": draft, "status": "pending_approval"}
 
 
+def apply_decision(
+    state: GraphState, status: Literal["approved", "rejected"], edited_draft: str
+) -> GraphState:
+    """Human decision step; the recorded draft is the text the human left in the editor."""
+    if status not in ("approved", "rejected"):
+        raise ValueError(f"Unknown decision status: {status!r}")
+    return {**state, "draft": edited_draft, "status": status}
+
+
 def build_graph():
     graph = StateGraph(GraphState)
     # Node names must not collide with GraphState keys ("score", "draft").
