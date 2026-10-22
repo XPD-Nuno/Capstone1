@@ -63,6 +63,8 @@ copy .env.example .env
 streamlit run mvp\app.py
 ```
 
+Tests: `pip install -r requirements-dev.txt` then `python -m pytest`. Bash and PowerShell commands are in [docs/mvp_documentation.md](docs/mvp_documentation.md).
+
 LangSmith experiment notes: [evaluation/langsmith.md](evaluation/langsmith.md).
 
 ## Constraints

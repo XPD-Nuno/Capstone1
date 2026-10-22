@@ -30,4 +30,4 @@ _The industry and use case have not been presented yet. Default working assumpti
 
 ## Initial MVP scope (locked unless CHANGE)
 
-Streamlit app + LangGraph: one synthetic lead in, structured score and Portuguese draft out, human must click Approve before status = `ready_to_send`. No live send.
+Streamlit app + LangGraph: one synthetic lead in, structured score and Portuguese draft out, human must click Approve before status = `approved` (statuses: `pending_approval` → `approved` / `rejected`). No live send.
