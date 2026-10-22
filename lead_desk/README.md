@@ -146,7 +146,12 @@ This is a first pass. It does not make Lead Desk GDPR-compliant on its own, and 
 python -m pytest lead_desk/tests tests
 npm --prefix web test            # Vitest: formatting, URL filters, queue and detail pages
 npm --prefix web run typecheck
+npm --prefix web run build && npm --prefix web run e2e   # Playwright smoke test (first time: npx --prefix web playwright install chromium)
 ```
+
+The Playwright smoke test (`web/e2e/smoke.spec.ts`) starts `python -m lead_desk serve-api --seed-demo` on a fresh in-memory database and drives Chromium through two flows: queue → lead_9001 → exclude a listing and re-match → approve; and lead_9002 → two-step reject → back to the queue with the updated statuses. Set `PYTHON` if your interpreter is not `python3`.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs three jobs on every pull request and on pushes to `main`: the Python tests, the web typecheck + Vitest + build, and the Playwright smoke test.
 
 The Python tests cover:
 
