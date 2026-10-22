@@ -33,6 +33,7 @@ class Settings:
     db_path: str = "lead_desk.sqlite3"
     tenant_id: str = "tenant_demo"
     max_matches: int = 3
+    retention_days: int | None = None
 
     telegram_webhook_secret: str | None = None
 
@@ -62,6 +63,7 @@ def load_settings(env_file: str | Path | None = None) -> Settings:
         db_path=_str("LEAD_DESK_DB_PATH") or "lead_desk.sqlite3",
         tenant_id=_str("LEAD_DESK_TENANT_ID") or "tenant_demo",
         max_matches=int(_str("LEAD_DESK_MAX_MATCHES") or 3),
+        retention_days=int(v) if (v := _str("LEAD_DESK_RETENTION_DAYS")) else None,
         telegram_webhook_secret=_str("TELEGRAM_WEBHOOK_SECRET"),
         imap_host=_str("IMAP_HOST"),
         imap_port=int(_str("IMAP_PORT") or 993),

@@ -72,3 +72,15 @@ CREATE TABLE IF NOT EXISTS usage_meters (
     quantity    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (tenant_id, period, meter)
 );
+
+-- One row per erased lead. Holds no lead content: only a SHA-256 of the lead id, so a later
+-- request about the same id can be answered ("erased on ...") without keeping the data.
+CREATE TABLE IF NOT EXISTS erasure_log (
+    erasure_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL REFERENCES tenants(tenant_id),
+    lead_id_sha256 TEXT NOT NULL,
+    reason      TEXT NOT NULL,   -- request | retention
+    actor       TEXT NOT NULL,   -- agent:<user_id> | system:retention
+    counts_json TEXT NOT NULL,
+    created_at  TEXT NOT NULL
+);

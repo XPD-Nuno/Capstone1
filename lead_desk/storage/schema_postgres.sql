@@ -72,3 +72,13 @@ CREATE TABLE IF NOT EXISTS usage_meters (
     quantity    BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (tenant_id, period, meter)
 );
+
+CREATE TABLE IF NOT EXISTS erasure_log (
+    erasure_id  BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL REFERENCES tenants(tenant_id),
+    lead_id_sha256 TEXT NOT NULL,
+    reason      TEXT NOT NULL,
+    actor       TEXT NOT NULL,
+    counts_json JSONB NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL
+);
