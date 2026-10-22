@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,8 @@ class LeadRepository:
         self.conn = sqlite3.connect(str(db_path), check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
+        # Deleted rows are overwritten with zeros instead of lingering in free pages.
+        self.conn.execute("PRAGMA secure_delete = ON")
         self.conn.executescript(SCHEMA.read_text(encoding="utf-8"))
         self.conn.execute(
             "INSERT OR IGNORE INTO tenants(tenant_id, name, created_at) VALUES (?, ?, ?)",
@@ -181,6 +184,91 @@ class LeadRepository:
             (self.tenant_id, lead_id),
         )
         return [r["listing_id"] for r in rows]
+
+    # ------------------------------------------------------------ data-subject requests + retention
+
+    def export_lead(self, lead_id: str) -> dict[str, Any] | None:
+        """Everything stored about one lead, as plain JSON-ready data."""
+        row = self.conn.execute(
+            "SELECT * FROM leads WHERE tenant_id = ? AND lead_id = ?", (self.tenant_id, lead_id)
+        ).fetchone()
+        if not row:
+            return None
+        record = {k: row[k] for k in row.keys() if k != "lead_json"}
+        packets = self.conn.execute(
+            "SELECT packet_id, status, created_at, decided_at, decided_by, packet_json FROM packets "
+            "WHERE tenant_id = ? AND lead_id = ? ORDER BY created_at",
+            (self.tenant_id, lead_id),
+        )
+        rejected = self.conn.execute(
+            "SELECT listing_id, rejected_by, created_at FROM rejected_listings WHERE tenant_id = ? AND lead_id = ? "
+            "ORDER BY listing_id",
+            (self.tenant_id, lead_id),
+        )
+        return {
+            "exported_at": _now(),
+            "tenant_id": self.tenant_id,
+            "lead_id": lead_id,
+            "record": record,
+            "lead": json.loads(row["lead_json"]),
+            "packets": [{k: p[k] for k in p.keys() if k != "packet_json"} | {"packet": json.loads(p["packet_json"])}
+                        for p in packets],
+            "rejected_listings": [dict(r) for r in rejected],
+            "events": [{k: v for k, v in e.items() if k != "payload_json"} for e in self.events(lead_id)],
+        }
+
+    def delete_lead(self, lead_id: str, *, actor: str, reason: str = "request") -> dict[str, int] | None:
+        """Erase a lead with its packets, decisions, events and listing exclusions. None if unknown."""
+        if not self.conn.execute(
+            "SELECT 1 FROM leads WHERE tenant_id = ? AND lead_id = ?", (self.tenant_id, lead_id)
+        ).fetchone():
+            return None
+        counts: dict[str, int] = {}
+        with self.conn:
+            for table in ("lead_events", "packets", "rejected_listings", "leads"):
+                cur = self.conn.execute(f"DELETE FROM {table} WHERE tenant_id = ? AND lead_id = ?",
+                                        (self.tenant_id, lead_id))
+                counts[table] = cur.rowcount
+            self.conn.execute(
+                "INSERT INTO erasure_log(tenant_id, lead_id_sha256, reason, actor, counts_json, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (self.tenant_id, hashlib.sha256(lead_id.encode()).hexdigest(), reason, actor,
+                 json.dumps(counts), _now()),
+            )
+        return counts
+
+    def erasure_record(self, lead_id: str) -> dict[str, Any] | None:
+        row = self.conn.execute(
+            "SELECT reason, actor, counts_json, created_at FROM erasure_log WHERE tenant_id = ? AND lead_id_sha256 = ? "
+            "ORDER BY erasure_id DESC LIMIT 1",
+            (self.tenant_id, hashlib.sha256(lead_id.encode()).hexdigest()),
+        ).fetchone()
+        return dict(row) | {"counts": json.loads(row["counts_json"])} if row else None
+
+    def leads_inactive_since(self, cutoff: datetime) -> list[str]:
+        """Leads whose last activity (contact, scoring, packet or decision) is older than `cutoff`."""
+        rows = self.conn.execute(
+            """
+            SELECT l.lead_id FROM leads l
+            WHERE l.tenant_id = ? AND MAX(
+                l.last_seen_at,
+                COALESCE((SELECT MAX(e.created_at) FROM lead_events e WHERE e.lead_id = l.lead_id), l.last_seen_at)
+            ) < ?
+            ORDER BY l.lead_id
+            """,
+            (self.tenant_id, cutoff.astimezone(timezone.utc).isoformat()),
+        )
+        return [r["lead_id"] for r in rows]
+
+    def purge_inactive(self, days: int, *, now: datetime | None = None, dry_run: bool = False) -> list[str]:
+        if days < 1:
+            raise ValueError("retention must be at least 1 day")
+        cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+        lead_ids = self.leads_inactive_since(cutoff)
+        if not dry_run:
+            for lead_id in lead_ids:
+                self.delete_lead(lead_id, actor="system:retention", reason="retention")
+        return lead_ids
 
     def bump_usage(self, meter: str, quantity: int = 1) -> None:
         period = datetime.now(timezone.utc).strftime("%Y-%m")

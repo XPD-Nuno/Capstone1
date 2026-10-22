@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -108,6 +108,17 @@ class IntakeRequest(BaseModel):
 
 class IntakeResponse(BaseModel):
     created: list[LeadSummary]
+
+
+class DeleteResponse(BaseModel):
+    lead_id: str
+    deleted: dict[str, int]
+
+
+class PurgeResponse(BaseModel):
+    days: int
+    dry_run: bool
+    lead_ids: list[str]
 
 
 def summarize(packet: AgentPacket, meta: dict[str, Any]) -> LeadSummary:
@@ -250,6 +261,31 @@ def create_app(settings: Settings | None = None, *, desk: LeadDesk | None = None
             except (NormalizeError, ValueError) as exc:
                 raise HTTPException(422, str(exc)) from exc
         return IntakeResponse(created=[summarize(p, {}) for p in packets])
+
+    @app.get("/api/leads/{lead_id}/export")
+    def export_lead(lead_id: str) -> JSONResponse:
+        with lock:
+            data = desk.repo.export_lead(lead_id)
+        if data is None:
+            raise HTTPException(404, f"Lead {lead_id} not found")
+        return JSONResponse(data, headers={"Content-Disposition": f'attachment; filename="{lead_id}.json"'})
+
+    @app.delete("/api/leads/{lead_id}", response_model=DeleteResponse)
+    def delete_lead(lead_id: str, agent_id: str = Query(default="agent_demo", min_length=1, max_length=64)) -> DeleteResponse:
+        with lock:
+            counts = desk.repo.delete_lead(lead_id, actor=f"agent:{agent_id}")
+        if counts is None:
+            raise HTTPException(404, f"Lead {lead_id} not found")
+        return DeleteResponse(lead_id=lead_id, deleted=counts)
+
+    @app.post("/api/retention/purge", response_model=PurgeResponse)
+    def purge(days: int | None = Query(default=None, ge=1), dry_run: bool = False) -> PurgeResponse:
+        days = days or settings.retention_days
+        if not days:
+            raise HTTPException(422, "No retention period: pass ?days= or set LEAD_DESK_RETENTION_DAYS")
+        with lock:
+            lead_ids = desk.repo.purge_inactive(days, dry_run=dry_run)
+        return PurgeResponse(days=days, dry_run=dry_run, lead_ids=lead_ids)
 
     @app.post("/api/demo/load", response_model=IntakeResponse)
     def demo_load() -> IntakeResponse:

@@ -7,6 +7,9 @@
   serve-api      FastAPI backend + web dashboard (web/dist) on http://127.0.0.1:8000
   review         approve/reject pending packets stored in the database
   leads          list stored leads
+  export-lead    print everything stored about one lead as JSON
+  delete-lead    erase one lead with its packets, decisions and events
+  purge          erase leads inactive for longer than the retention period
 """
 
 from __future__ import annotations
@@ -108,6 +111,48 @@ def cmd_leads(args: argparse.Namespace, settings: Settings) -> int:
     return 0
 
 
+def cmd_export_lead(args: argparse.Namespace, settings: Settings) -> int:
+    repo = LeadRepository(args.db, tenant_id=settings.tenant_id)
+    data = repo.export_lead(args.lead_id)
+    if data is None:
+        print(f"Lead {args.lead_id} not found in {args.db}", file=sys.stderr)
+        return 1
+    text = json.dumps(data, ensure_ascii=False, indent=2)
+    if args.out:
+        Path(args.out).write_text(text + "\n", encoding="utf-8")
+        print(f"Exported {args.lead_id} to {args.out}")
+    else:
+        print(text)
+    return 0
+
+
+def cmd_delete_lead(args: argparse.Namespace, settings: Settings) -> int:
+    repo = LeadRepository(args.db, tenant_id=settings.tenant_id)
+    if not args.yes:
+        answer = input(f"Erase {args.lead_id} and all its packets, decisions and events from {args.db}? [y/N] ")
+        if answer.strip().lower() not in {"y", "yes"}:
+            print("Nothing deleted.")
+            return 1
+    counts = repo.delete_lead(args.lead_id, actor=f"agent:{args.agent}")
+    if counts is None:
+        print(f"Lead {args.lead_id} not found in {args.db}", file=sys.stderr)
+        return 1
+    print(f"Erased {args.lead_id}: " + ", ".join(f"{n} {table}" for table, n in counts.items()))
+    return 0
+
+
+def cmd_purge(args: argparse.Namespace, settings: Settings) -> int:
+    days = args.days or settings.retention_days
+    if not days:
+        print("No retention period: pass --days or set LEAD_DESK_RETENTION_DAYS.", file=sys.stderr)
+        return 2
+    repo = LeadRepository(args.db, tenant_id=settings.tenant_id)
+    lead_ids = repo.purge_inactive(days, dry_run=args.dry_run)
+    verb = "Would erase" if args.dry_run else "Erased"
+    print(f"{verb} {len(lead_ids)} lead(s) inactive for more than {days} days" + (": " + ", ".join(lead_ids) if lead_ids else ""))
+    return 0
+
+
 def cmd_serve_api(args: argparse.Namespace, settings: Settings) -> int:
     import uvicorn
 
@@ -185,6 +230,24 @@ def build_parser() -> argparse.ArgumentParser:
     common(p, None)
     p.add_argument("--band", choices=["HOT", "WARM", "COLD"])
     p.set_defaults(func=cmd_leads)
+
+    p = sub.add_parser("export-lead", help="print everything stored about one lead as JSON")
+    common(p, None)
+    p.add_argument("lead_id")
+    p.add_argument("--out", default=None, help="write to this file instead of stdout")
+    p.set_defaults(func=cmd_export_lead)
+
+    p = sub.add_parser("delete-lead", help="erase one lead and everything linked to it")
+    common(p, None)
+    p.add_argument("lead_id")
+    p.add_argument("--yes", action="store_true", help="do not ask for confirmation")
+    p.set_defaults(func=cmd_delete_lead)
+
+    p = sub.add_parser("purge", help="erase leads inactive for longer than the retention period")
+    common(p, None)
+    p.add_argument("--days", type=int, default=None, help="retention in days (default: LEAD_DESK_RETENTION_DAYS)")
+    p.add_argument("--dry-run", action="store_true", help="list what would be erased without deleting")
+    p.set_defaults(func=cmd_purge)
     return parser
 
 

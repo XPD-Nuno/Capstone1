@@ -41,6 +41,7 @@ npm --prefix web run dev                       # terminal 2 -> http://localhost:
 | `POST /api/packets/{id}/reject` | `{agent_id, note, listing_ids}`; with `listing_ids` the lead is re-matched without them |
 | `POST /api/intake/{email\|telegram}` | `{payload, lead_id?, signals?}`: run one inbound message through the pipeline |
 | `POST /api/demo/load` | Load the synthetic demo leads that are not already on the desk |
+| `GET /api/leads/{lead_id}/export`, `DELETE /api/leads/{lead_id}`, `POST /api/retention/purge` | Export, erase, retention purge (see "Data requests and retention") |
 
 Interactive API docs are at `/docs`.
 
@@ -80,6 +81,9 @@ python -m lead_desk serve-api --db lead_desk.sqlite3           # web dashboard +
 python -m lead_desk serve-webhooks --db lead_desk.sqlite3      # Telegram webhook stub on :8787
 python -m lead_desk review --db lead_desk.sqlite3              # approve/reject everything pending
 python -m lead_desk leads --db lead_desk.sqlite3 --band HOT
+python -m lead_desk export-lead lead_9001 --db lead_desk.sqlite3   # see "Data requests and retention"
+python -m lead_desk delete-lead lead_9001 --db lead_desk.sqlite3
+python -m lead_desk purge --days 365 --dry-run --db lead_desk.sqlite3
 ```
 
 The webhook endpoint is `POST /webhooks/telegram`. It checks `X-Telegram-Bot-Api-Secret-Token` when `TELEGRAM_WEBHOOK_SECRET` is set. The server is a stdlib demo stub; put it behind HTTPS before pointing Telegram at it.
@@ -103,6 +107,32 @@ The bands and points come from the seed engine `src/scoring_engine.py`. `score_l
 3. A few extra intent keywords that the synthetic data uses: "selling", "listar o/a", "pôr à venda", "buying", "purchase".
 4. Whole-word guardrail matching, so "terrace" no longer trips "race", plus the policy categories missing from the seed list.
 
+The full list of differences, and why eval_03 moves from WARM to COLD, is in [scoring_versions.md](scoring_versions.md).
+
+## Data requests and retention (first pass)
+
+Lead Desk stores each lead's message, extracted fields, scores, packets, agent decisions and an event log. Three tools help answer a data-subject request or apply a retention period:
+
+| Need | CLI | API |
+| --- | --- | --- |
+| Give a lead a copy of their data | `python -m lead_desk export-lead lead_9001 --db lead_desk.sqlite3 [--out lead_9001.json]` | `GET /api/leads/{lead_id}/export` (JSON download) |
+| Erase a lead | `python -m lead_desk delete-lead lead_9001 --db lead_desk.sqlite3 [--yes] --agent agent_ana` | `DELETE /api/leads/{lead_id}?agent_id=agent_ana` |
+| Erase leads with no activity for N days | `python -m lead_desk purge --db lead_desk.sqlite3 --days 365 [--dry-run]` | `POST /api/retention/purge?days=365&dry_run=true` |
+
+- **Export** returns the lead record, every packet (with matches, draft and decision), excluded listings and the event history.
+- **Erase** removes the lead, its packets, decisions, events and excluded listings in one transaction. It keeps one line in `erasure_log` with a SHA-256 of the lead id, who erased it, why (`request` or `retention`) and row counts, so the agency can later show that the erasure happened without keeping the data. SQLite `secure_delete` is on, so erased text is overwritten in the database file. If the same person writes again, they come back as a new lead with no history.
+- **Retention:** a lead's last activity is its latest contact, score, packet or decision. `purge` uses `--days`, or `LEAD_DESK_RETENTION_DAYS` when set; with neither, it refuses to run. Nothing runs on a schedule: run it from cron (or a scheduled job) once a period is agreed. Always try `--dry-run` first.
+
+This is a first pass. It does not make Lead Desk GDPR-compliant on its own, and the following gaps remain:
+
+- No identity check: whoever runs the command or calls the API can export or erase any lead. The API has no login, so keep it on localhost.
+- Requests are found by `lead_id` only. Finding a person's leads by email address or Telegram id is not built yet.
+- Copies outside the database are not touched: backups, exported JSON files, copied drafts, server logs, the original mailbox and Telegram chat.
+- No retention period has been chosen. That is a decision for the agency (with its DPO or legal adviser), not a code default.
+- No record of processing activities, consent capture, objection (opt-out of scoring) or rectification flow. Correcting data today means re-ingesting it.
+- The Postgres schema has the `erasure_log` table but no Postgres repository yet, so these tools are SQLite-only.
+- The dashboard does not show export or erase buttons yet; use the CLI or the API.
+
 ## Listings: Idealista first
 
 - **`IdealistaProvider`** calls the Idealista Search API v3.5: an OAuth2 client-credentials token, then `POST /3.5/pt/search`. The search uses the city centre plus a radius, and passes operation, price, size, bedrooms and the amenity flags (lift, garage, terrace, pool, A/C, storage room). Results become `idealista_<propertyCode>` listings.
@@ -116,7 +146,12 @@ The bands and points come from the seed engine `src/scoring_engine.py`. `score_l
 python -m pytest lead_desk/tests tests
 npm --prefix web test            # Vitest: formatting, URL filters, queue and detail pages
 npm --prefix web run typecheck
+npm --prefix web run build && npm --prefix web run e2e   # Playwright smoke test (first time: npx --prefix web playwright install chromium)
 ```
+
+The Playwright smoke test (`web/e2e/smoke.spec.ts`) starts `python -m lead_desk serve-api --seed-demo` on a fresh in-memory database and drives Chromium through two flows: queue → lead_9001 → exclude a listing and re-match → approve; and lead_9002 → two-step reject → back to the queue with the updated statuses. Set `PYTHON` if your interpreter is not `python3`.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs three jobs on every pull request and on pushes to `main`: the Python tests, the web typecheck + Vitest + build, and the Playwright smoke test.
 
 The Python tests cover:
 
@@ -131,6 +166,7 @@ The Python tests cover:
 - The CLI-only delivery.
 - The approve/reject flow and Telegram webhook auth.
 - The dashboard API: filters, search, sort, approve/reject conflicts, reject-listing re-match, intake and demo loading.
+- Export, erasure (including that erased text is gone from the database file) and retention purge, via the repository, API and CLI.
 
 The frontend tests use `web/src/test/fixtures.json`, a snapshot of real API responses for the synthetic demo leads.
 
@@ -143,6 +179,7 @@ Copy the repo-root `.env.example` to `.env`. Every variable is optional.
 | `LEAD_DESK_DB_PATH` | SQLite file for `ingest` / `imap-poll` / `serve-webhooks` / `review` / `leads` |
 | `LEAD_DESK_TENANT_ID` | Tenant id stored on every row |
 | `LEAD_DESK_MAX_MATCHES` | Listings per packet |
+| `LEAD_DESK_RETENTION_DAYS` | Default period for `purge` / `POST /api/retention/purge`. Unset means no default |
 | `TELEGRAM_WEBHOOK_SECRET` | The `secret_token` you pass to Telegram `setWebhook` |
 | `IMAP_HOST`, `IMAP_PORT`, `IMAP_USER`, `IMAP_PASSWORD`, `IMAP_FOLDER` | Email intake (read-only: fetch UNSEEN) |
 | `IDEALISTA_API_KEY`, `IDEALISTA_API_SECRET` | Idealista Search API credentials (partner approval required). Unset means the mock inventory |
