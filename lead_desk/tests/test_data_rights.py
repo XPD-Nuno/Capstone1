@@ -57,7 +57,7 @@ def test_delete_erases_everything_and_keeps_only_a_hashed_log(settings):
     counts = desk.repo.delete_lead("lead_9001", actor="agent:agent_ana")
     assert counts["leads"] == 1 and counts["packets"] == 2 and counts["rejected_listings"] == 1
     assert rows_for(desk.repo, "lead_9001") == {"leads": 0, "packets": 0, "lead_events": 0, "rejected_listings": 0}
-    assert len(desk.repo.latest_packets()) == 6
+    assert len(desk.repo.latest_packets()) == len(DEMO) - 1
     log = desk.repo.conn.execute("SELECT * FROM erasure_log").fetchall()
     assert len(log) == 1 and "lead_9001" not in json.dumps([dict(r) for r in log])
     assert desk.repo.erasure_record("lead_9001")["actor"] == "agent:agent_ana"
@@ -91,10 +91,10 @@ def test_purge_only_erases_inactive_leads(settings):
     assert desk.repo.purge_inactive(365, dry_run=True) == ["lead_9004"]
     assert rows_for(desk.repo, "lead_9004")["leads"] == 1
     assert desk.repo.purge_inactive(180) == ["lead_9004", "lead_9005"]
-    assert len(desk.repo.latest_packets()) == 5
+    assert len(desk.repo.latest_packets()) == len(DEMO) - 2
     assert desk.repo.erasure_record("lead_9004")["reason"] == "retention"
     future = datetime.now(timezone.utc) + timedelta(days=31)
-    assert len(desk.repo.purge_inactive(30, now=future)) == 5
+    assert len(desk.repo.purge_inactive(30, now=future)) == len(DEMO) - 2
     with pytest.raises(ValueError):
         desk.repo.purge_inactive(0)
 
@@ -123,7 +123,7 @@ def test_api_export_delete_and_purge(client):
     assert res.status_code == 200 and res.json()["deleted"]["leads"] == 1
     assert client.get("/api/leads/lead_9003").status_code == 404
     assert client.delete("/api/leads/lead_9003").status_code == 404
-    assert client.get("/api/stats").json()["total"] == 6
+    assert client.get("/api/stats").json()["total"] == len(DEMO) - 1
 
     assert client.post("/api/retention/purge").status_code == 422
     res = client.post("/api/retention/purge", params={"days": 30, "dry_run": True})
@@ -135,7 +135,7 @@ def test_api_purge_uses_configured_retention():
     backdate(desk.repo, "lead_9007", 120)
     client = TestClient(create_app(desk.settings, desk=desk, serve_web=False))
     assert client.post("/api/retention/purge").json()["lead_ids"] == ["lead_9007"]
-    assert client.get("/api/stats").json()["total"] == 6
+    assert client.get("/api/stats").json()["total"] == len(DEMO) - 1
 
 
 def test_cli_export_delete_and_purge(tmp_path, capsys, settings):

@@ -110,5 +110,140 @@
         "text": "Procuro arrendamento em Coimbra, T1 até 800 €, para entrar nos próximos 2 meses."
       }
     }
+  },
+  {
+    "lead_id": "lead_9008",
+    "channel": "email",
+    "note": "Imovirtual portal notification in PT. HOT buyer in Porto with parking and 14-day timeline.",
+    "signals": {
+      "property_views_7d": 10,
+      "saved_listings": 3
+    },
+    "payload": "From: Imovirtual <no-reply@imovirtual.com>\nTo: agency-inbox@example.invalid\nSubject: Pedido de contacto - T2 Paranhos\nMessage-ID: <synthetic-9008@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nTem um novo pedido de contacto.\nEmail: lead_9008@example.invalid\nTelefone: [synthetic-redacted]\nMensagem: Olá, quero comprar um T2 no Porto com estacionamento, até 290 mil euros. Gostava de visitar na próxima semana.\nReferência: IMO-SYN-0008\n"
+  },
+  {
+    "lead_id": "lead_9009",
+    "channel": "telegram",
+    "note": "Telegram buyer in Coimbra with phone, 6-month timeline (>90 days). WARM buyer.",
+    "signals": {
+      "property_views_7d": 4,
+      "saved_listings": 1
+    },
+    "payload": {
+      "update_id": 9009,
+      "message": {
+        "message_id": 4,
+        "from": {
+          "id": 900009009,
+          "is_bot": false,
+          "first_name": "lead_9009"
+        },
+        "chat": {
+          "id": 900009009,
+          "type": "private"
+        },
+        "date": 1792000100,
+        "text": "Bom dia, quero comprar um T3 em Coimbra com elevador até 270 mil euros dentro de 6 meses. Telefone: [synthetic-redacted]"
+      }
+    }
+  },
+  {
+    "lead_id": "lead_9010",
+    "channel": "telegram",
+    "note": "Telegram buyer in Faro with short timeline and budget, but no phone or previous reply yet. WARM (held at WARM: no phone).",
+    "signals": {
+      "property_views_7d": 9,
+      "saved_listings": 3
+    },
+    "payload": {
+      "update_id": 9010,
+      "message": {
+        "message_id": 5,
+        "from": {
+          "id": 900009010,
+          "is_bot": false,
+          "first_name": "lead_9010"
+        },
+        "chat": {
+          "id": 900009010,
+          "type": "private"
+        },
+        "date": 1792000200,
+        "text": "Olá, quero comprar T3 em Faro com piscina e garagem até 350 mil euros este mês. Podem enviar opções?"
+      }
+    }
+  },
+  {
+    "lead_id": "lead_9011",
+    "channel": "email",
+    "note": "Direct email from seller in Cascais with phone and 6-month timeline (>90d, low activity). WARM seller.",
+    "payload": "From: lead_9011 <lead_9011@example.invalid>\nTo: agency-inbox@example.invalid\nSubject: Colocar à venda moradia em Cascais\nMessage-ID: <synthetic-9011@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nBom dia, penso pôr à venda o meu T4 em Cascais dentro de 6 meses e gostava de saber como trabalham a comissão.\nTelefone: [synthetic-redacted]\n"
+  },
+  {
+    "lead_id": "lead_9012",
+    "channel": "email",
+    "note": "Direct email rental in Lisboa WITH phone number and urgent timeline. WARM (rentals capped at WARM even with phone).",
+    "signals": {
+      "property_views_7d": 11,
+      "saved_listings": 4
+    },
+    "payload": "From: lead_9012 <lead_9012@example.invalid>\nTo: agency-inbox@example.invalid\nSubject: Arrendamento T1 Lisboa\nMessage-ID: <synthetic-9012@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nBoa tarde, procuro arrendar T1 em Lisboa com varanda até 1.400 € por mês para entrar no próximo mês.\nTelemóvel: [synthetic-redacted]\n"
+  },
+  {
+    "lead_id": "lead_9013",
+    "channel": "email",
+    "note": "Email-only rental enquiry in Porto (no phone, no reply). Tests interaction of email-only COLD rule vs rental rule.",
+    "payload": {
+      "from": "lead_9013@example.invalid",
+      "subject": "Arrendar T2 no Porto",
+      "body": "Olá, quero arrendar um T2 no Porto com elevador até 1200 euros nos próximos 2 meses. Aguardo contacto por email.",
+      "message_id": "<synthetic-9013@example.invalid>"
+    }
+  },
+  {
+    "lead_id": "lead_9014",
+    "channel": "email",
+    "note": "Direct email reply ('Re:') from buyer in Vila Nova de Gaia without phone but already in conversation. HOT buyer.",
+    "signals": {
+      "property_views_7d": 8,
+      "saved_listings": 3
+    },
+    "payload": "From: lead_9014 <lead_9014@example.invalid>\nTo: agency-inbox@example.invalid\nSubject: Re: Apartamento T2 em Vila Nova de Gaia\nIn-Reply-To: <agency-msg-01@example.invalid>\nMessage-ID: <synthetic-9014@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nObrigado pelo envio. Quero comprar um T2 em Vila Nova de Gaia com elevador e garagem até 260 mil euros e posso visitar esta semana.\n"
+  },
+  {
+    "lead_id": "lead_9015",
+    "channel": "telegram",
+    "note": "Telegram HOT buyer in Lisboa with unrealistic budget (180k for a T3 in Lisboa -> 0 inventory matches).",
+    "signals": {
+      "property_views_7d": 15,
+      "saved_listings": 6
+    },
+    "payload": {
+      "update_id": 9015,
+      "message": {
+        "message_id": 6,
+        "from": {
+          "id": 900009015,
+          "is_bot": false,
+          "first_name": "lead_9015"
+        },
+        "chat": {
+          "id": 900009015,
+          "type": "private"
+        },
+        "date": 1792000300,
+        "text": "Quero comprar T3 em Lisboa até 180 mil euros, tenho crédito habitação aprovado e quero visitar esta semana.\nTelefone: [synthetic-redacted]"
+      }
+    }
+  },
+  {
+    "lead_id": "lead_9016",
+    "channel": "email",
+    "note": "English buyer relocating to Aveiro (city extracted, but 0 listings in mock inventory for Aveiro). HOT buyer.",
+    "signals": {
+      "property_views_7d": 10,
+      "saved_listings": 4
+    },
+    "payload": "From: lead_9016 <lead_9016@example.invalid>\nTo: agency-inbox@example.invalid\nSubject: Relocating - buying T2 in Aveiro\nMessage-ID: <synthetic-9016@example.invalid>\nContent-Type: text/plain; charset=utf-8\n\nHello, we are relocating from abroad and want to buy a T2 in Aveiro up to €280,000 within 2 months.\nPhone: [synthetic-redacted]\n"
   }
 ]
