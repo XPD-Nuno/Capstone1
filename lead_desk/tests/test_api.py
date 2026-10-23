@@ -19,15 +19,15 @@ def lead(client: TestClient, lead_id: str) -> dict:
 
 def test_stats_reflect_seeded_demo(client):
     stats = client.get("/api/stats").json()
-    assert stats["total"] == 7
-    assert stats["by_band"] == {"HOT": 3, "WARM": 1, "COLD": 3}
+    assert stats["total"] == 16
+    assert stats["by_band"] == {"HOT": 7, "WARM": 5, "COLD": 4}
     assert stats["listings_provider"] == "mock"
-    assert stats["pending"] + stats["by_status"]["blocked_guardrail"] <= 7
+    assert stats["pending"] + stats["by_status"]["blocked_guardrail"] <= 16
 
 
 def test_priority_sort_puts_pending_hot_first(client):
     rows = client.get("/api/leads").json()
-    assert len(rows) == 7
+    assert len(rows) == 16
     assert rows[0]["band"] == "HOT" and rows[0]["status"] == "pending_review"
     bands = [r["band"] for r in rows if r["status"] == "pending_review"]
     assert bands == sorted(bands, key=["HOT", "WARM", "COLD"].index)
@@ -37,7 +37,7 @@ def test_filters_and_search(client):
     hot = client.get("/api/leads", params={"band": "HOT"}).json()
     assert {r["band"] for r in hot} == {"HOT"}
     multi = client.get("/api/leads", params=[("band", "HOT"), ("band", "WARM")]).json()
-    assert len(multi) == 4
+    assert len(multi) == 12
     telegram = client.get("/api/leads", params={"channel": "telegram"}).json()
     assert telegram and {r["channel"] for r in telegram} == {"telegram"}
     assert [r["lead_id"] for r in client.get("/api/leads", params={"q": "lead_9007"}).json()] == ["lead_9007"]
@@ -88,7 +88,7 @@ def test_reject_listing_rematches_without_it(client):
     assert excluded in after["rejected_listing_ids"]
     assert excluded not in [m["listing"]["listing_id"] for m in after["packet"]["matches"]]
     assert [p["status"] for p in after["packets"]] == ["pending_review", "rejected"]
-    assert client.get("/api/stats").json()["total"] == 7
+    assert client.get("/api/stats").json()["total"] == 16
 
 
 def test_reject_unknown_listing_conflicts(client):
@@ -105,7 +105,7 @@ def test_intake_telegram_and_bad_payload(client):
     assert res.status_code == 201
     created = res.json()["created"]
     assert [c["lead_id"] for c in created] == ["lead_9100"]
-    assert client.get("/api/stats").json()["total"] == 8
+    assert client.get("/api/stats").json()["total"] == 17
     assert client.post("/api/intake/telegram", json={"payload": {"update_id": 2}}).json()["created"] == []
     empty = {"from": "lead_9101@example.invalid", "subject": "", "body": "   "}
     assert client.post("/api/intake/email", json={"payload": empty}).status_code == 422
@@ -113,4 +113,4 @@ def test_intake_telegram_and_bad_payload(client):
 
 def test_demo_load_is_idempotent(client):
     assert client.post("/api/demo/load").json()["created"] == []
-    assert client.get("/api/stats").json()["total"] == 7
+    assert client.get("/api/stats").json()["total"] == 16

@@ -50,8 +50,12 @@ def test_all_synthetic_payloads_expected_bands(settings):
             bands[p.lead.lead_id] = p.score.band.value
             assert p.status == PacketStatus.PENDING_REVIEW and p.guardrail.passed
             assert p.audience == "agent_only"
-    assert bands == {"lead_9001": "HOT", "lead_9002": "HOT", "lead_9003": "COLD", "lead_9004": "COLD",
-                     "lead_9005": "COLD", "lead_9006": "HOT", "lead_9007": "WARM"}
+    assert bands == {
+        "lead_9001": "HOT", "lead_9002": "HOT", "lead_9003": "COLD", "lead_9004": "COLD",
+        "lead_9005": "COLD", "lead_9006": "HOT", "lead_9007": "WARM", "lead_9008": "HOT",
+        "lead_9009": "WARM", "lead_9010": "WARM", "lead_9011": "WARM", "lead_9012": "WARM",
+        "lead_9013": "COLD", "lead_9014": "HOT", "lead_9015": "HOT", "lead_9016": "HOT",
+    }
 
 
 def test_email_only_lead_gets_qualifying_draft_and_rental_gets_rent_matches(settings):

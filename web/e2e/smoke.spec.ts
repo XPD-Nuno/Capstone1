@@ -7,7 +7,7 @@ function queueRow(page: Page, leadId: string) {
 test("queue → detail → exclude & re-match → approve", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Lead queue" })).toBeVisible();
-  await expect(page.getByText("7 leads")).toBeVisible();
+  await expect(page.getByText("16 leads")).toBeVisible();
 
   await page.getByPlaceholder(/Search lead id/).fill("Lisboa");
   await expect(queueRow(page, "lead_9001")).toBeVisible();
@@ -50,5 +50,5 @@ test("reject a whole packet with the two-step confirm", async ({ page }) => {
   await page.getByRole("link", { name: /Lead queue/ }).click();
   await expect(queueRow(page, "lead_9001")).toContainText("Approved");
   await expect(queueRow(page, "lead_9002")).toContainText("Rejected");
-  await expect(page.getByRole("row").filter({ hasText: "Needs review" })).toHaveCount(5);
+  await expect(page.getByRole("row").filter({ hasText: "Needs review" })).toHaveCount(14);
 });
